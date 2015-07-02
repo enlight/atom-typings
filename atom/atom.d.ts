@@ -5,21 +5,27 @@
 
 /// <reference path="../q/Q.d.ts" />
 /// <reference path="../jquery/jquery.d.ts" />
-/// <reference path="../space-pen/space-pen.d.ts" />
 /// <reference path="../pathwatcher/pathwatcher.d.ts" />
 /// <reference path="../text-buffer/text-buffer.d.ts" />
-/// <reference path="../status-bar/status-bar.d.ts" />
 /// <reference path="../event-kit/event-kit.d.ts" />
 /// <reference path="../first-mate/first-mate.d.ts" />
+/// <reference path="../atom-keymap/atom-keymap.d.ts" />
+/// <reference path="../serializable/serializable.d.ts" />
+/// <reference path="../electron/electron.d.ts" />
 
 // Policy: this definition file only declare element related to `atom`.
 // if js file include to another npm package (e.g. "space-pen", "mixto" and "emissary").
 // you should create a separate file.
 
+// The Window interface is already defined in TypeScript's lib.d.ts, so the interface below will
+// be merged into the standard one. In Atom this stuff is implemented in window-bootstrap.coffee
+// and window.coffee.
 interface Window {
 	atom: AtomCore.IAtom;
-	measure(description:string, fn:Function):any; // return fn result
-	profile(description:string, fn:Function):any; // return fn result
+	/** Measures how long a function takes to run. */
+	measure<T>(description: string, fn: () => T): T;
+	/** Creates a dev tools profile for a function. */
+	profile<T>(description: string, fn: () => T): T;
 }
 
 declare module AtomCore {
@@ -30,10 +36,12 @@ declare module AtomCore {
 	type IRangeOrArray = TextBuffer.IRangeOrArray;
 	type Disposable = EventKit.Disposable;
 	type IGrammar = FirstMate.IGrammar;
+	type IKeymapManager = AtomKeyMap.KeymapManager;
+	type Directory = PathWatcher.IDirectory;
 
 	// DONE
 	interface ICommandRegistry {
-    add(target: string, commands: Object): Disposable;
+		add(target: string, commands: Object): Disposable;
 		add(target: string, commandName: string, callback: (e: Event) => void): Disposable;
 		findCommands(params: { target: Element }): Array<{name: string; displayName: string}>;
 		dispatch(target: string, commandName: string, detail: any): boolean;
@@ -220,11 +228,15 @@ declare module AtomCore {
 		refreshMarkerScreenPositions(): void;
 	}
 
+	// DONE
+	/** Interface for ViewRegistry class in Atom. */
 	interface IViewRegistry {
-		getView(selector:any):any;
+		addViewProvider(modelConstructor: Function, createView: (model: any) => HTMLElement): Disposable;
+		getView(model: any): HTMLElement;
 	}
 
 	// DONE
+	/** Interface for ScopeDescriptor class in Atom. */
 	interface IScopeDescriptor {
 		getScopesArray(): string[];
   }
@@ -341,7 +353,7 @@ declare module AtomCore {
 	}
 
 	/** Interface for Selection class in Atom. */
-	interface ISelection /* extends Theorist.Model */ {
+	interface ISelection {
 		cursor: ICursor;
 		marker: Marker;
 		editor: ITextEditor;
@@ -898,182 +910,260 @@ declare module AtomCore {
 		logScreenLines(start?: number, end?: number): void;
 	}
 
-	interface IPane /* extends Theorist.Model */ {
-        itemForURI: (uri:string)=>ITextEditor;
-		items:any[];
-		activeItem:any;
+	// DONE
+	/** A container that displays content at the center of the workspace. */
+	interface IPane extends ISerializable {
+		// Event Subscription
 
-		serializeParams():any;
-		deserializeParams(params:any):any;
-		getViewClass():any; // return type are PaneView
-		isActive():boolean;
-		isDestroyed():boolean;
-		focus():void;
-		blur():void;
-		activate():void;
-		getPanes():IPane[];
-		getItems():any[];
-		getActiveItem():any;
-		getActiveEditor():any;
-		itemAtIndex(index:number):any;
-		activateNextItem():any;
-		activatePreviousItem():any;
-		getActiveItemIndex():number;
-		activateItemAtIndex(index:number):any;
-		activateItem(item:any):any;
-		addItem(item:any, index:number):any;
-		addItems(items:any[], index:number):any[];
-		removeItem(item:any, destroying:any):void;
-		moveItem(item:any, newIndex:number):void;
-		moveItemToPane(item:any, pane:IPane, index:number):void;
-		destroyActiveItem():boolean; // always return false
-		destroyItem(item:any):boolean;
-		destroyItems():any[];
-		destroyInactiveItems():any[];
-		destroy():void;
-		destroyed():any[];
-		promptToSaveItem(item:any):boolean;
-		saveActiveItem():void;
-		saveActiveItemAs():void;
-		saveItem(item:any, nextAction:Function):void;
-		saveItemAs(item:any, nextAction:Function):void;
-		saveItems():any[];
-		itemForUri(uri:any):any;
-		activateItemForUri(uri:any):any;
-		copyActiveItem():void;
-		splitLeft(params:any):IPane;
-		splitRight(params:any):IPane;
-		splitUp(params:any):IPane;
-		splitDown(params:any):IPane;
-		split(orientation:string, side:string, params:any):IPane;
-		findLeftmostSibling():IPane;
-		findOrCreateRightmostSibling():IPane;
+		onDidChangeFlexScale(callback: (flexScale: number) => void): Disposable;
+		observeFlexScale(callback: (flexScale: number) => void): Disposable;
+		onDidActivate(callback: Function): Disposable;
+		onDidDestroy(callback: Function): Disposable;
+		onDidChangeActive(callback: (active: boolean) => void): Disposable;
+		observeActive(callback: (active: boolean) => void): Disposable;
+		onDidAddItem(callback: (e: { item: any; index: number }) => void): Disposable;
+		onDidRemoveItem(callback: (e: { item: any; index: number }) => void): Disposable;
+		onDidMoveItem(callback: (e: { item: any; oldIndex: number; newIndex: number }) => void): Disposable;
+		observeItems(callback: (item: any) => void): Disposable;
+		onDidChangeActiveItem(callback: (activeItem: any) => void): Disposable;
+		observeActiveItem(callback: (activeItem: any) => void): Disposable;
+		onWillDestroyItem(callback: (e: { item: any; index: number }) => void): Disposable;
+
+		// Items
+
+		getItems(): any[];
+		getActiveItem(): any;
+		getActiveEditor(): ITextEditor;
+		itemAtIndex(index: number): any;
+		activateNextItem(): any;
+		activatePreviousItem(): any;
+		moveItemRight(): void;
+		moveItemLeft(): void;
+		getActiveItemIndex(): number;
+		activateItemAtIndex(index: number): any;
+		activateItem(item: any): any;
+		addItem(item: any, index?: number): any;
+		addItems(items: any[], index?: number): any[];
+		moveItem(item: any, index: number): void;
+		moveItemToPane(item: any, pane: IPane, index: number): any;
+		/** Note that the return value doesn't represent success/failure, just ignore it. */
+		destroyActiveItem(): boolean;
+		destroyItem(item: any): boolean;
+		destroyItems(): void;
+		destroyInactiveItems(): void;
+		saveActiveItem(nextAction?: Function): any;
+		saveActiveItemAs(nextAction?: Function): any;
+		saveItem(item: any, nextAction?: Function): any;
+		saveItemAs(item: any, nextAction?: Function): any;
+		saveItems(): void;
+		itemForURI(uri: string): any;
+		activateItemForURI(uri: string): boolean;
+
+		// Lifecycle
+
+		isActive(): boolean;
+		activate(): void;
+		destroy(): void;
+
+		// Splitting
+
+		splitLeft(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
+		splitRight(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
+		splitUp(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
+		splitDown(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
 	}
 
-// https://atom.io/docs/v0.84.0/advanced/serialization
-	interface ISerializationStatic<T> {
-		deserialize(data:ISerializationInfo):T;
-		new (data:T): ISerialization;
+	// DONE
+	// see <https://atom.io/docs/v0.186.0/advanced/serialization>
+	interface IAtomSerializableStatic<T> {
+		deserialize(state: ISerializedState): T;
+		new (data: T): IAtomSerializable;
 	}
 
-	interface ISerialization {
-		serialize():ISerializationInfo;
+	// DONE
+	interface IAtomSerializable {
+		serialize(): ISerializedState;
 	}
 
-	interface ISerializationInfo {
-		deserializer: string;
-	}
-
+	// FIXME: This doesn't belong here, it's from Electron
 	interface IBrowserWindow {
 		getPosition():number[];
 		getSize():number[];
 	}
 
-	interface IProjectStatic {
-		pathForRepositoryUrl(repoUrl:string):string;
-
-		new (arg?:{path:any; buffers:any[];}):IProject;
+	// DONE
+	/** Interface for Project class in Atom. */
+	interface IProject extends ISerializable {
+		onDidChangePaths(callback: (projectPaths: string[]) => void): Disposable;
+		repositoryForDirectory(directory: Directory): Q.Promise<any /* Repository */>;
+		getPaths(): string[];
+		setPaths(projectPaths: string[]): void;
+		addPath(projectPath: string): void;
+		removePath(projectPath: string): boolean;
+		getDirectories(): Directory[];
+		relativizePath(fullPath: string): string[];
+		contains(pathToCheck: string): boolean;
 	}
 
-	interface IProject /* extends Theorist.Model */ {
-		// Serializable.includeInto(Project);
-
-		path:string;
-		/** deprecated */
-		rootDirectory?:PathWatcher.IDirectory;
-		rootDirectories:PathWatcher.IDirectory[];
-
-		serializeParams():any;
-		deserializeParams(params:any):any;
-		destroyed():any;
-		destroyRepo():any;
-		destroyUnretainedBuffers():any;
-		getRepo():IGit;
-		getPath():string;
-		setPath(projectPath:string):any;
-		getRootDirectory():PathWatcher.IDirectory;
-		resolve(uri:string):string;
-		relativize(fullPath:string):string;
-		contains(pathToCheck:string):boolean;
-		open(filePath:string, options?:any):Q.Promise<ITextEditor>;
-		openSync(filePath:string, options?:any):ITextEditor;
-		getBuffers():TextBuffer.ITextBuffer;
-		isPathModified(filePath:string):boolean;
-		findBufferForPath(filePath:string):TextBuffer.ITextBuffer;
-		bufferForPathSync(filePath:string):TextBuffer.ITextBuffer;
-		bufferForPath(filePath:string):Q.Promise<TextBuffer.ITextBuffer>;
-		bufferForId(id:any):TextBuffer.ITextBuffer;
-		buildBufferSync(absoluteFilePath:string):TextBuffer.ITextBuffer;
-		buildBuffer(absoluteFilePath:string):Q.Promise<TextBuffer.ITextBuffer>;
-		addBuffer(buffer:TextBuffer.ITextBuffer, options?:any):any;
-		addBufferAtIndex(buffer:TextBuffer.ITextBuffer, index:number, options?:any):any;
-		scan(regex:any, options:any, iterator:any):Q.Promise<any>;
-		replace(regex:any, replacementText:any, filePaths:any, iterator:any):Q.Promise<any>;
-		buildEditorForBuffer(buffer:any, editorOptions:any):ITextEditor;
-		eachBuffer(...args:any[]):any;
-
-        onDidChangePaths(callback: Function): Disposable;
-	}
-
-	interface IWorkspaceStatic {
-		new():IWorkspace;
-	}
-
+	// DONE
 	interface IWorkspacePanelOptions{
-		item:any;
-		visible?:boolean;
-		priority?:number;
+		item: any; // DOM element, JQuery element, or a model with a registered view
+		visible?: boolean;
+		priority?: number;
 	}
 
-	interface Panel{
-		getItem():any;
-		getPriority():any;
-		isVisible():boolean;
-		show();
-		hide();
+	// DONE
+	/** A container on the edge of an editor window. */
+	interface IPanel {
+		destroy(): void;
+		onDidChangeVisible(callback: (visible: boolean) => void): Disposable;
+		onDidDestroy(callback: (panel: IPanel) => void): Disposable;
+		getItem(): any;
+		getPriority(): number;
+		isVisible(): boolean;
+		hide(): void;
+		show(): void;
 	}
 
-	interface IWorkspace {
-		addBottomPanel(options:IWorkspacePanelOptions):Panel;
-		addLeftPanel(options:IWorkspacePanelOptions):Panel;
-		addRightPanel(options:IWorkspacePanelOptions):Panel;
-		addTopPanel(options:IWorkspacePanelOptions):Panel;
-		addModalPanel(options:IWorkspacePanelOptions):Panel;
-        addOpener(opener: Function): any;
+	// DONE
+	interface IPaneItemEvent {
+		item: any;
+		pane: IPane;
+		index: number;
+	}
 
-		deserializeParams(params:any):any;
-		serializeParams():{paneContainer:any;fullScreen:boolean;};
-        eachEditor(callback: Function): void;
-		getTextEditors():ITextEditor[];
-		open(uri:string, options:any):Q.Promise<View>;
-		openLicense():void;
-		openSync(uri:string, options:any):any;
-        openUriInPane(uri: string, pane: any, options: any): Q.Promise<View>;
-        observeTextEditors(callback: Function): Disposable;
-		reopenItemSync():any;
-		registerOpener(opener:(urlToOpen:string)=>any):void;
-		unregisterOpener(opener:Function):void;
-		getOpeners():any;
-		getActivePane(): IPane;
-		getActivePaneItem(): IPane;
+	// DONE
+	interface IPaneItemOpenEvent extends IPaneItemEvent {
+		uri?: string;
+	}
+
+	// DONE
+	/** A promise that provides the ability to cancel the asynchronous operation it represents. */
+	interface ICancellablePromise extends Q.Promise<string> {
+		cancel(): void;
+	}
+
+	// DONE
+	interface IWorkspaceScanIteratorFunc {
+		(filePath: string): void;
+		(arg: { filePath: string; matches: any[] }): void;
+	}
+
+	// DONE
+	interface IWorkspaceScanResult {
+		/** Path to the file within which a match was found. */
+		filePath: string;
+		matches: Array<{
+			/** The text that matched the regex. */
+			matchText: string;
+			/** The full line of text within which the match was found (excluding eol). */
+			lineText: string;
+			lineTextOffset: number;
+			/**
+			 * The range the match was found in, either a range object or an array of the form:
+			 * `[[lineNumber, matchStartIndex], [lineNumber, matchEndIndex]]`
+			 */
+			range: IRangeOrArray;
+		}>;
+	}
+
+	// DONE
+	/** Interface for Workspace class in Atom. */
+	interface IWorkspace extends ISerializable {
+		// Event Subscription
+
+		observeTextEditors(callback: (editor: ITextEditor) => void): Disposable;
+		observePaneItems(callback: (item: IPane) => void): Disposable;
+		onDidChangeActivePaneItem(callback: (item: IPane) => void): Disposable;
+		observeActivePaneItem(callback: (item: IPane) => void): Disposable;
+		onDidOpen(callback: (event: IPaneItemOpenEvent) => void): Disposable;
+		onDidAddPane(callback: (event: { pane: IPane }) => void): Disposable;
+		onDidDestroyPane(callback: (event: { pane: IPane }) => void): Disposable;
+		observePanes(callback: (pane: IPane) => void): Disposable;
+		onDidChangeActivePane(callback: (pane: IPane) => void): Disposable;
+		observeActivePane(callback: (pane: IPane) => void): Disposable;
+		onDidAddPaneItem(callback: (event: IPaneItemEvent) => void): Disposable;
+		onWillDestroyPaneItem(callback: (event: IPaneItemEvent) => void): Disposable;
+		onDidDestroyPaneItem(callback: (event: IPaneItemEvent) => void): Disposable;
+		onDidAddTextEditor(callback: (event: {
+			textEditor: ITextEditor;
+			pane: IPane;
+			index: number;
+		}) => void): Disposable;
+
+		// Opening
+
+		open(uri?: string, options?: {
+			initialLine?: number;
+			initialColumn?: number;
+			split?: string;
+			activatePane?: boolean;
+			searchAllPanes?: boolean;
+		}): Q.Promise<any>;
+		openSync(uri?: string, options?: {
+			initialLine?: number;
+			initialColumn?: number;
+			activatePane?: boolean;
+		}): any;
+		reopenItem(): Q.Promise<any>;
+		addOpener(opener: (uri: string, options?: any) => any): Disposable;
+
+		// Pane items
+
+		getPaneItems(): any[];
+		getActivePaneItem(): any;
+		getTextEditors(): ITextEditor[];
 		getActiveTextEditor(): ITextEditor;
-		getPanes():any;
-		saveAll():void;
-		activateNextPane():any;
-		activatePreviousPane():any;
-		paneForURI: (uri:string) => IPane;
-		saveActivePaneItem():any;
-		saveActivePaneItemAs():any;
-		destroyActivePaneItem():any;
-		destroyActivePane():any;
-		increaseFontSize():void;
-		decreaseFontSize():void;
-		resetFontSize():void;
-		itemOpened(item:any):void;
-		onPaneItemDestroyed(item:any):void;
-		destroyed():void;
+		saveAll(): void;
+		saveActivePaneItem(): void;
+		saveActivePaneItemAs(): void;
+		destroyActivePaneItem(): void;
 
-		onDidChangeActivePaneItem(item:any):Disposable;
+		// Panes
+
+		getPanes(): IPane[];
+		getActivePane(): IPane;
+		activateNextPane(): boolean;
+		activatePreviousPane(): boolean;
+		paneForURI(uri: string): IPane;
+		paneForItem(item: any): IPane;
+		destroyActivePane(): void;
+		destroyActivePaneItemOrEmptyPane(): void;
+
+		// Panels
+
+		getBottomPanels(): IPanel[];
+		addBottomPanel(options: IWorkspacePanelOptions): IPanel;
+		getLeftPanels(): IPanel[];
+		addLeftPanel(options: IWorkspacePanelOptions): IPanel;
+		getRightPanels(): IPanel[];
+		addRightPanel(options: IWorkspacePanelOptions): IPanel;
+		getTopPanels(): IPanel[];
+		addTopPanel(options: IWorkspacePanelOptions): IPanel;
+		getModalPanels(): IPanel[];
+		addModalPanel(options: IWorkspacePanelOptions): IPanel;
+		panelForItem(item: any): IPanel;
+
+		// Search and Replace
+
+		scan(
+			regex: RegExp,
+			iterator: (result: IWorkspaceScanResult, error: any) => void
+		): ICancellablePromise;
+
+		scan(
+			regex: RegExp,
+			options: {
+				paths: string[];
+				onPathsSearched: (numberOfPathsSearched: number) => void
+			},
+			iterator: (result: IWorkspaceScanResult, error: any) => void
+		): ICancellablePromise;
+
+		replace(
+			regex: RegExp, replacementText: string, filePaths: string[],
+			iterator: (arg: { filePath: string; replacements: number }) => void
+		): Q.Promise<void>;
 	}
 
 	interface IAtomSettings {
@@ -1097,22 +1187,63 @@ declare module AtomCore {
 		workspace:any;
 	}
 
+	interface ISerializedState {
+		version?: number;
+		deserializer: string;
+	}
+
+	interface IDeserializer {
+		version?: number;
+		name: string;
+		deserialize(state: ISerializedState, params?: any): any;
+	}
+
+	// DONE
+	/** Interface for DeserializerManager class in Atom. */
 	interface IDeserializerManager {
-		deserializers:Function;
-		add:Function;
-		remove:Function;
-		deserialize:Function;
-		get:Function;
+		add(...deserializers: IDeserializer[]): Disposable;
+		deserialize(state: ISerializedState, params?: any): any;
+		get(state: ISerializedState): IDeserializer;
 	}
 
+	interface IConfigChangeEvent {
+		newValue: any;
+		oldValue: any;
+		keyPath: string;
+	}
+
+	// DONE
+	/** Interface for Config class in Atom. */
 	interface IConfig {
-		get(keyPath:string):any;
-		// TBD
-	}
+		// Event Subscription
 
-	interface IKeymapManager {
-		defaultTarget:HTMLElement;
-		// TBD
+		observe(keyPath: string, callback: (newValue: any) => void): Disposable;
+		observe(keyPath: string, options: { scopeDescriptor: IScopeDescriptor }, callback: (newValue: any) => void): Disposable;
+		onDidChange(callback: (e: IConfigChangeEvent) => void): Disposable;
+		onDidChange(keyPath: string, callback: (e: IConfigChangeEvent) => void): Disposable;
+		onDidChange(keyPath: string, options: { scopeDescriptor: IScopeDescriptor }, callback: (e: IConfigChangeEvent) => void): Disposable;
+
+		// Settings Management
+
+		get(keyPath: string, options?: {
+			sources?: string[];
+			excludeSources?: string[];
+			scope?: IScopeDescriptor;
+		}): any;
+		getAll(keyPath: string, options?: {
+			sources?: string[];
+			excludeSources?: string[];
+			scope?: IScopeDescriptor;
+		}): Array<{ scopeDescriptor: IScopeDescriptor; value: any }>;
+		set(keyPath: string, value: any, options?: {
+			scopeSelector?: string;
+			source?: string;
+		}): boolean;
+		unset(keyPath: string, options?: { scopeSelector?: string; source?: string }): void;
+		getSources(): string[];
+		getSchema(keyPath: string): any;
+		getUserConfigPath(): string;
+		transact(callback: Function): void;
 	}
 
 	// DONE
@@ -1120,6 +1251,11 @@ declare module AtomCore {
 	interface IPackage {
 		/** Is this package compatible with this version of Atom? */
 		isCompatible(): boolean;
+	}
+
+	// DONE
+	// Interface for ThemePackage class in Atom
+	interface IThemePackage extends IPackage {
 	}
 
 	// DONE
@@ -1185,21 +1321,58 @@ declare module AtomCore {
 		getAvailablePackageMetadata(): any[];
 	}
 
+	// DONE
+	/** Interface for ThemeManager class in Atom. */
 	interface IThemeManager {
-		// TBD
+		onDidChangeActiveThemes(callback: Function): Disposable;
+
+		getLoadedThemeNames(): string[];
+		getLoadedThemes(): IThemePackage[];
+		getActiveThemeNames(): string[];
+		getActiveThemes(): IThemePackage[];
+
+		getEnabledThemeNames(): string[];
 	}
 
+	// DONE
+	/** Interface for ContextMenuManager class in Atom. */
 	interface IContextMenuManager {
-		// TBD
+		add(itemsBySelector: any): Disposable;
 	}
 
+	// DONE
+	/** Interface for items specified within the `itemsBySelector` argument of `IContextMenuManager.add()`. */
+	interface IContextMenuItem {
+		label?: string;
+		command?: string;
+		submenu?: IContextMenuItem[];
+		type?: string;
+		created?: (event: MouseEvent) => void;
+		shouldDisplay?: (event: MouseEvent) => void;
+	}
+
+	// DONE
+	/** Interface for items passed to `IMenuManager.add()`. */
+	interface IMenuItem {
+		label: string;
+		submenu?: IMenuItem[];
+		command?: string;
+	}
+
+	// DONE
+	/** Interface for MenuManager class in Atom. */
 	interface IMenuManager {
-		// TBD
+		add(items: IMenuItem[]): Disposable;
+		update(): void;
 	}
 
+	// DONE
+	/** Interface for Clipboard class in Atom. */
 	interface IClipboard {
-		write(text:string, metadata?:any):any;
-		read():string;
+		md5(text: string): string;
+		write(text: string, metadata?: any): void;
+		read(): string;
+		readWithMetadata(): { text: string; metadata: any };
 	}
 
 	// DONE
@@ -1211,6 +1384,7 @@ declare module AtomCore {
 	}
 
 	// DONE
+	/** Interface for StorageFolder class in Atom. */
 	interface IStorageFolder {
 		store(name: string, value: any): void;
 		load(name: string): any;
@@ -1219,6 +1393,7 @@ declare module AtomCore {
 	}
 
 	// DONE
+	/** Interface for TooltipManager class in Atom. */
 	interface ITooltipManager {
 		add(target: HTMLElement, options: any): Disposable;
 	}
@@ -1250,6 +1425,7 @@ declare module AtomCore {
 	}
 
 	// DONE
+	/** Interface for NotificationManager class in Atom. */
 	interface INotificationManager {
 		onDidAddNotification(callback: (notification: Notification) => void): Disposable;
 		addSuccess(message: string, options?: INotificationOptions): Disposable;
@@ -1266,6 +1442,7 @@ declare module AtomCore {
 	}
 
 	// DONE
+	/** Interface for GrammarRegistry class in Atom. */
 	interface IGrammarRegistry {
 		selectGrammar(filePath: string, fileContents: string): IGrammar;
 	}
@@ -1276,12 +1453,14 @@ declare module AtomCore {
 		context: string;
 	}
 
-  // DONE
+	// DONE
+	/** Interface for StyleManager class in Atom. */
 	interface IStyleManager {
 		observeStyleElements(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
 		onDidAddStyleElement(callback): Disposable;
 		onDidRemoveStyleElement(callback): Disposable;
 		onDidUpdateStyleElement(callback): Disposable;
+
 		getStyleElements(): IAtomHTMLStyleElement[];
 		getUserStyleSheetPath(): string;
 	}
@@ -1363,9 +1542,9 @@ declare module AtomCore {
 		copy(properties?: any): Marker;
 
 		/** Invokes the given callback when the state of the marker changes. */
-		onDidChange(callback: (e: IMarkerChangeEvent) => void): EventKit.Disposable;
+		onDidChange(callback: (e: IMarkerChangeEvent) => void): Disposable;
 		/** Invokes the given callback when the marker is destroyed. */
-		onDidDestroy(callback: Function): EventKit.Disposable;
+		onDidDestroy(callback: Function): Disposable;
 
 		isValid(): boolean;
 		isDestroyed(): boolean;
@@ -1403,10 +1582,6 @@ declare module AtomCore {
 		clearTail(properties?: any): boolean;
 	}
 
-	interface ITransaction {
-		// TBD
-	}
-
 	interface ITaskStatic {
 		new(taskPath:any):ITask;
 	}
@@ -1416,8 +1591,9 @@ declare module AtomCore {
 	}
 
 	// DONE
-	interface IAtomStatic extends ISerializationStatic<IAtom> {
+	interface IAtomStatic extends IAtomSerializableStatic<IAtom> {
 		version: number;
+
 		loadOrCreate(mode: string): IAtom;
 		loadState(mode: any): void;
 		getStateKey(paths: string[], mode: string): string;
@@ -1548,11 +1724,11 @@ declare module "atom" {
 	var TextBuffer: TextBuffer.ITextBufferStatic;
 	var Point: TextBuffer.IPointStatic;
 	var Range: TextBuffer.IRangeStatic;
-	// TODO: var File
-	// TODO: var Directory
+	var File: PathWatcher.IFileStatic;
+	var Directory: PathWatcher.IDirectoryStatic;
 	var Emitter: typeof EventKit.Emitter;
-  var Disposable: typeof EventKit.Disposable;
-  var CompositeDisposable: typeof EventKit.CompositeDisposable;
+	var Disposable: typeof EventKit.Disposable;
+	var CompositeDisposable: typeof EventKit.CompositeDisposable;
 	var Task: AtomCore.ITaskStatic;
 	// TODO: var TextEditor
 }
