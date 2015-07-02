@@ -31,20 +31,12 @@ declare module AtomCore {
 	type Disposable = EventKit.Disposable;
 	type IGrammar = FirstMate.IGrammar;
 
-	interface IPanes {
-		// TBD
-	}
-
 	// DONE
 	interface ICommandRegistry {
     add(target: string, commands: Object): Disposable;
 		add(target: string, commandName: string, callback: (e: Event) => void): Disposable;
 		findCommands(params: { target: Element }): Array<{name: string; displayName: string}>;
 		dispatch(target: string, commandName: string, detail: any): boolean;
-  }
-
-  interface ICommandPanel {
-		// TBD
 	}
 
 	interface IDisplayBufferStatic {
@@ -336,10 +328,6 @@ declare module AtomCore {
 		clearSelection(): void;
 		/** Gets the RegExp used by the cursor to determine what is a "word". */
 		wordRegExp(options?: { includeNonWordCharacters: boolean }): RegExp;
-	}
-
-	interface ILanguageMode {
-		// TBD
 	}
 
 	// DONE
