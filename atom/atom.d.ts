@@ -260,9 +260,9 @@ declare module AtomCore {
 
 		constructor: ICursorStatic;
 		destroy(): void;
-		onDidChangePosition(callback: (e: ICursorChangeEvent) => void): EventKit.Disposable;
-		onDidDestroy(callback: Function): EventKit.Disposable;
-		onDidChangeVisibility(callback: (visibility: boolean) => void): EventKit.Disposable;
+		onDidChangePosition(callback: (e: ICursorChangeEvent) => void): Disposable;
+		onDidDestroy(callback: Function): Disposable;
+		onDidChangeVisibility(callback: (visibility: boolean) => void): Disposable;
 
 		setScreenPosition(screenPosition: IPointOrArray, options?: { autoscroll?: boolean }): void;
 		getScreenPosition(): TextBuffer.IPoint;
@@ -525,37 +525,37 @@ declare module AtomCore {
 
 		// Event Subscription
 
-		onDidChangeTitle(callback: Function): EventKit.Disposable;
-		onDidChangePath(callback: Function): EventKit.Disposable;
-		onDidChange(callback: Function): EventKit.Disposable;
-		onDidStopChanging(callback: Function): EventKit.Disposable;
-		onDidChangeCursorPosition(callback: (e: ICursorChangeEvent) => void): EventKit.Disposable;
-		onDidChangeSelectionRange(callback: (e: ISelectionChangeEvent) => void): EventKit.Disposable;
-		onDidChangeSoftWrapped(callback: Function): EventKit.Disposable;
-		onDidChangeEncoding(callback: Function): EventKit.Disposable;
-		observeGrammar(callback: (grammar: IGrammar) => void): EventKit.Disposable;
-		onDidChangeGrammar(callback: (grammar: IGrammar) => void): EventKit.Disposable;
-		onDidChangeModified(callback: Function): EventKit.Disposable;
-		onDidConflict(callback: Function): EventKit.Disposable;
-		onWillInsertText(callback: (e: { text: string, cancel: Function }) => void): EventKit.Disposable;
-		onDidInsertText(callback: (e: { text: string }) => void): EventKit.Disposable;
-		onDidSave(callback: (e: { path: string }) => void): EventKit.Disposable;
-		onDidDestroy(callback: Function): EventKit.Disposable;
-		observeCursors(callback: (cursor: ICursor) => void): EventKit.Disposable;
-		onDidAddCursor(callback: (cursor: ICursor) => void): EventKit.Disposable;
-		onDidRemoveCursor(callback: (cursor: ICursor) => void): EventKit.Disposable;
-		observeSelections(callback: (selection: ISelection) => void): EventKit.Disposable;
-		onDidAddSelection(callback: (selection: ISelection) => void): EventKit.Disposable;
-		onDidRemoveSelection(callback: (selection: ISelection) => void): EventKit.Disposable;
-		observeDecorations(callback: (decoration: Decoration) => void): EventKit.Disposable;
-		onDidAddDecoration(callback: (decoration: Decoration) => void): EventKit.Disposable;
-		onDidRemoveDecoration(callback: (decoration: Decoration) => void): EventKit.Disposable;
-		onDidChangePlaceholderText(callback: (placeholderText: string) => void): EventKit.Disposable;
-		onDidChangeCharacterWidths(callback: Function): EventKit.Disposable;
-		onDidChangeScrollTop(callback: Function): EventKit.Disposable;
-		onDidChangeScrollLeft(callback: Function): EventKit.Disposable;
-		onDidChangeIcon(callback: Function): EventKit.Disposable;
-		onDidUpdateMarkers(callback: Function): EventKit.Disposable;
+		onDidChangeTitle(callback: Function): Disposable;
+		onDidChangePath(callback: Function): Disposable;
+		onDidChange(callback: Function): Disposable;
+		onDidStopChanging(callback: Function): Disposable;
+		onDidChangeCursorPosition(callback: (e: ICursorChangeEvent) => void): Disposable;
+		onDidChangeSelectionRange(callback: (e: ISelectionChangeEvent) => void): Disposable;
+		onDidChangeSoftWrapped(callback: Function): Disposable;
+		onDidChangeEncoding(callback: Function): Disposable;
+		observeGrammar(callback: (grammar: IGrammar) => void): Disposable;
+		onDidChangeGrammar(callback: (grammar: IGrammar) => void): Disposable;
+		onDidChangeModified(callback: Function): Disposable;
+		onDidConflict(callback: Function): Disposable;
+		onWillInsertText(callback: (e: { text: string, cancel: Function }) => void): Disposable;
+		onDidInsertText(callback: (e: { text: string }) => void): Disposable;
+		onDidSave(callback: (e: { path: string }) => void): Disposable;
+		onDidDestroy(callback: Function): Disposable;
+		observeCursors(callback: (cursor: ICursor) => void): Disposable;
+		onDidAddCursor(callback: (cursor: ICursor) => void): Disposable;
+		onDidRemoveCursor(callback: (cursor: ICursor) => void): Disposable;
+		observeSelections(callback: (selection: ISelection) => void): Disposable;
+		onDidAddSelection(callback: (selection: ISelection) => void): Disposable;
+		onDidRemoveSelection(callback: (selection: ISelection) => void): Disposable;
+		observeDecorations(callback: (decoration: Decoration) => void): Disposable;
+		onDidAddDecoration(callback: (decoration: Decoration) => void): Disposable;
+		onDidRemoveDecoration(callback: (decoration: Decoration) => void): Disposable;
+		onDidChangePlaceholderText(callback: (placeholderText: string) => void): Disposable;
+		onDidChangeCharacterWidths(callback: Function): Disposable;
+		onDidChangeScrollTop(callback: Function): Disposable;
+		onDidChangeScrollLeft(callback: Function): Disposable;
+		onDidChangeIcon(callback: Function): Disposable;
+		onDidUpdateMarkers(callback: Function): Disposable;
 
 		getBuffer(): TextBuffer.ITextBuffer;
 		getURI(): string;
@@ -564,7 +564,7 @@ declare module AtomCore {
 		setVisible(visible: boolean): void;
 		setLineNumberGutterVisible(visible: boolean): boolean;
 		isLineNumberGutterVisible(): boolean;
-		onDidChangeLineNumberGutterVisible(callback: (visible: boolean) => void): EventKit.Disposable;
+		onDidChangeLineNumberGutterVisible(callback: (visible: boolean) => void): Disposable;
 
 		addGutter(options: {
 			name: string;
