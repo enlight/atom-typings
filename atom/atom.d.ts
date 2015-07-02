@@ -736,7 +736,7 @@ declare module AtomCore {
 		moveToBeginningOfNextParagraph(): void;
 		moveToBeginningOfPreviousParagraph(): void;
 		getLastCursor(): ICursor;
-		getWordUnderCursor(options?: { wordRegex: RegEx }): string;
+		getWordUnderCursor(options?: { wordRegex: RegExp }): string;
 		getCursors(): ICursor[];
 		getCursorsOrderedByBufferPosition(): ICursor[];
 		addCursor(marker: Marker): ICursor;
@@ -787,9 +787,9 @@ declare module AtomCore {
 
 		// Search and Replace
 
-		scan(regex: RegEx, iterator: IScanIteratorFunc): void;
-		scanInBufferRange(regex: RegEx, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
-		backwardsScanInBufferRange(regex: RegEx, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
+		scan(regex: RegExp, iterator: IScanIteratorFunc): void;
+		scanInBufferRange(regex: RegExp, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
+		backwardsScanInBufferRange(regex: RegExp, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
 
 		// Tab Behavior
 
