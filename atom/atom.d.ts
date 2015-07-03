@@ -41,6 +41,14 @@ declare module AtomCore {
 	type BrowserWindow = GitHubElectron.BrowserWindow;
 	type ISerializable = AtomSerializable.ISerializable;
 
+	interface IModel {
+		id: number;
+
+		destroy(): void;
+		isAlive(): boolean;
+		isDestroyed(): boolean;
+	}
+
 	// DONE
 	interface ICommandRegistry {
 		add(target: string, commands: Object): Disposable;
@@ -71,7 +79,7 @@ declare module AtomCore {
 	 * Note that much of the functionality provided by DisplayBuffer can be used indirectly via more
 	 * public classes such as TextEditor.
 	 */
-	interface IDisplayBuffer extends ISerializable {
+	interface IDisplayBuffer extends IModel, ISerializable {
 		copy(): IDisplayBuffer;
 		updateAllScreenLines(): void;
 
@@ -213,12 +221,10 @@ declare module AtomCore {
 
 	// DONE... but maybe ditch the constructor
 	/** Interface for Cursor class in Atom. */
-	interface ICursor /* extends Theorist.Model */ {
+	interface ICursor extends IModel {
 		editor: ITextEditor;
-		id: number;
 
 		constructor: ICursorStatic;
-		destroy(): void;
 		onDidChangePosition(callback: (e: ICursorChangeEvent) => void): Disposable;
 		onDidDestroy(callback: Function): Disposable;
 		onDidChangeVisibility(callback: (visibility: boolean) => void): Disposable;
@@ -308,7 +314,7 @@ declare module AtomCore {
 	}
 
 	/** Interface for Selection class in Atom. */
-	interface ISelection {
+	interface ISelection extends IModel {
 		cursor: ICursor;
 		marker: Marker;
 		editor: ITextEditor;
@@ -317,7 +323,6 @@ declare module AtomCore {
 		needsAutoscroll: boolean;
 		retainSelection: boolean;
 
-		destroy():any;
 		finalize():any;
 		clearAutoscroll():any;
 		isEmpty():boolean;
@@ -475,9 +480,7 @@ declare module AtomCore {
 
 	// DONE... but need to rename to TextEditor and make it a class
 	/** Interface for TextEditor class in Atom. */
-	interface ITextEditor {
-		id: number;
-
+	interface ITextEditor extends IModel, ISerializable {
 		// Event Subscription
 
 		onDidChangeTitle(callback: Function): Disposable;
@@ -867,7 +870,7 @@ declare module AtomCore {
 
 	// DONE
 	/** A container that displays content at the center of the workspace. */
-	interface IPane extends ISerializable {
+	interface IPane extends IModel, ISerializable {
 		// Event Subscription
 
 		onDidChangeFlexScale(callback: (flexScale: number) => void): Disposable;
@@ -918,7 +921,6 @@ declare module AtomCore {
 
 		isActive(): boolean;
 		activate(): void;
-		destroy(): void;
 
 		// Splitting
 
@@ -942,7 +944,7 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for Project class in Atom. */
-	interface IProject extends ISerializable {
+	interface IProject extends IModel, ISerializable {
 		onDidChangePaths(callback: (projectPaths: string[]) => void): Disposable;
 		repositoryForDirectory(directory: Directory): Q.Promise<any /* Repository */>;
 		getPaths(): string[];
@@ -1018,7 +1020,7 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for Workspace class in Atom. */
-	interface IWorkspace extends ISerializable {
+	interface IWorkspace extends IModel, ISerializable {
 		// Event Subscription
 
 		observeTextEditors(callback: (editor: ITextEditor) => void): Disposable;
@@ -1392,7 +1394,7 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for GrammarRegistry class in Atom. */
-	interface IGrammarRegistry {
+	interface IGrammarRegistry /*extends FirstMate.GrammarRegistry*/ {
 		selectGrammar(filePath: string, fileContents: string): IGrammar;
 	}
 
@@ -1433,7 +1435,7 @@ declare module AtomCore {
 		kill:Function;
 	}
 
-	interface ITokenizedBuffer {
+	interface ITokenizedBuffer extends IModel, ISerializable {
 		// TBD
 	}
 
@@ -1565,7 +1567,7 @@ declare module AtomCore {
 	}
 
 	// DONE
-	interface IAtom {
+	interface IAtom extends IModel {
 		commands: ICommandRegistry;
 		config: IConfig;
 		clipboard: IClipboard;
