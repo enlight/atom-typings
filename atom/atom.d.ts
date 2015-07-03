@@ -39,6 +39,7 @@ declare module AtomCore {
 	type IKeymapManager = AtomKeyMap.KeymapManager;
 	type Directory = PathWatcher.IDirectory;
 	type BrowserWindow = GitHubElectron.BrowserWindow;
+	type ISerializable = AtomSerializable.ISerializable;
 
 	// DONE
 	interface ICommandRegistry {
