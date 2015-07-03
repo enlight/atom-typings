@@ -11,7 +11,7 @@
 /// <reference path="../first-mate/first-mate.d.ts" />
 /// <reference path="../atom-keymap/atom-keymap.d.ts" />
 /// <reference path="../serializable/serializable.d.ts" />
-/// <reference path="../electron/electron.d.ts" />
+/// <reference path="../github-electron/github-electron.d.ts" />
 
 // Policy: this definition file only declare element related to `atom`.
 // if js file include to another npm package (e.g. "space-pen", "mixto" and "emissary").
@@ -38,6 +38,7 @@ declare module AtomCore {
 	type IGrammar = FirstMate.IGrammar;
 	type IKeymapManager = AtomKeyMap.KeymapManager;
 	type Directory = PathWatcher.IDirectory;
+	type BrowserWindow = GitHubElectron.BrowserWindow;
 
 	// DONE
 	interface ICommandRegistry {
@@ -938,12 +939,6 @@ declare module AtomCore {
 		serialize(): ISerializedState;
 	}
 
-	// FIXME: This doesn't belong here, it's from Electron
-	interface IBrowserWindow {
-		getPosition():number[];
-		getSize():number[];
-	}
-
 	// DONE
 	/** Interface for Project class in Atom. */
 	interface IProject extends ISerializable {
@@ -1563,7 +1558,7 @@ declare module AtomCore {
 		getStorageFolder(): IStorageFolder;
 		getLoadSettings(): IAtomSettings;
 		updateLoadSettings(key: string, value: any): void;
-		getCurrentWindow(): IBrowserWindow;
+		getCurrentWindow(): BrowserWindow;
 
 		new(state: IAtomState): IAtom;
 	}
@@ -1634,7 +1629,7 @@ declare module AtomCore {
 		setSize(width: number, height: number);
 		getPosition(): { x: number, y: number };
 		setPosition(x: number, y: number);
-		getCurrentWindow(): IBrowserWindow;
+		getCurrentWindow(): BrowserWindow;
 		center(): void;
 		focus(): void;
 		show(): void;
