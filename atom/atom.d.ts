@@ -13,9 +13,8 @@
 /// <reference path="../serializable/serializable.d.ts" />
 /// <reference path="../github-electron/github-electron.d.ts" />
 
-// Policy: this definition file only declare element related to `atom`.
-// if js file include to another npm package (e.g. "space-pen", "mixto" and "emissary").
-// you should create a separate file.
+// Policy: this file should only declare types from Atom core,
+// any types from non-core Atom modules should be declared in separate files.
 
 // The Window interface is already defined in TypeScript's lib.d.ts, so the interface below will
 // be merged into the standard one. In Atom this stuff is implemented in window-bootstrap.coffee
@@ -216,16 +215,11 @@ declare module AtomCore {
 		cursor: Cursor;
 	}
 
-	interface ICursorStatic {
-		new (arg: { editor: TextEditor; marker: Marker; id: number }): Cursor;
-	}
-
-	// DONE... but maybe ditch the constructor
+	// DONE
 	/** Interface for Cursor class in Atom. */
 	interface Cursor extends Model {
 		editor: TextEditor;
 
-		constructor: ICursorStatic;
 		onDidChangePosition(callback: (e: ICursorChangeEvent) => void): Disposable;
 		onDidDestroy(callback: Function): Disposable;
 		onDidChangeVisibility(callback: (visibility: boolean) => void): Disposable;
@@ -314,81 +308,99 @@ declare module AtomCore {
 		undo?: string;
 	}
 
-	/** Interface for Selection class in Atom. */
+	// DONE
+	/** Represents a selection in the text editor. */
 	interface Selection extends Model {
 		cursor: Cursor;
 		marker: Marker;
 		editor: TextEditor;
-		initialScreenRange: any;
-		wordwise: boolean;
-		needsAutoscroll: boolean;
-		retainSelection: boolean;
 
-		finalize():any;
-		clearAutoscroll():any;
-		isEmpty():boolean;
-		isReversed():boolean;
-		isSingleScreenLine():boolean;
-		getScreenRange():IRange;
-		setScreenRange(screenRange:any, options:any):any;
-		getBufferRange():IRange;
-		setBufferRange(bufferRange:any, options:any):any;
-		getBufferRowRange():number[];
-		autoscroll():void;
-		getText():string;
-		clear():boolean;
-		selectWord():IRange;
-		expandOverWord():any;
-		selectLine(row?:any):IRange;
-		expandOverLine():boolean;
-		selectToScreenPosition(position:any):any;
-		selectToBufferPosition(position:any):any;
-		selectRight():boolean;
-		selectLeft():boolean;
-		selectUp(rowCount?:any):boolean;
-		selectDown(rowCount?:any):boolean;
-		selectToTop():any;
-		selectToBottom():any;
-		selectAll():any;
-		selectToBeginningOfLine():any;
-		selectToFirstCharacterOfLine():any;
-		selectToEndOfLine():any;
-		selectToBeginningOfWord():any;
-		selectToEndOfWord():any;
-		selectToBeginningOfNextWord():any;
-		selectToPreviousWordBoundary():any;
-		selectToNextWordBoundary():any;
-		addSelectionBelow():any;
-		getGoalBufferRange():any;
-		addSelectionAbove():any[];
-		insertText(text:string, options?: ISelectionInsertTextOptions): IRange;
-		normalizeIndents(text:string, indentBasis:number):any;
-		indent(_arg?:any):any;
-		indentSelectedRows():IRange[];
-		setIndentationForLine(line:string, indentLevel:number):any;
-		backspace():any;
-		backspaceToBeginningOfWord():any;
-		backspaceToBeginningOfLine():any;
-		delete():any;
-		deleteToEndOfWord():any;
-		deleteSelectedText():any;
-		deleteLine():any;
-		joinLines():any;
-		outdentSelectedRows():any[];
-		autoIndentSelectedRows():any;
-		toggleLineComments():any;
-		cutToEndOfLine(maintainClipboard:any):any;
-		cut(maintainClipboard:any):any;
-		copy(maintainClipboard:any):any;
-		fold():any;
-		modifySelection(fn:()=>any):any;
-		plantTail():any;
-		intersectsBufferRange(bufferRange:any):any;
-		intersectsWith(otherSelection:any):any;
-		merge(otherSelection:any, options:any):any;
-		compare(otherSelection:any):any;
-		getRegionRects():any[];
-		screenRangeChanged():any;
+		onDidChangeRange(callback: (event: ISelectionChangeEvent) => void): Disposable;
+		onDidDestroy(callback: Function): Disposable;
+
+		// Managing the selection range
+
+		getScreenRange(): IRange;
+		setScreenRange(screenRange: IRangeOrArray, options?: any): void;
+		getBufferRange(): IRange;
+		setBufferRange(bufferRange: IRangeOrArray, options?: {
+			preserveFolds?: boolean;
+			autoscroll?: boolean;
+		}): void;
+		getBufferRowRange(): number[];
+
+		// Info about the selection
+
+		isEmpty(): boolean;
+		isReversed(): boolean;
+		isSingleScreenLine(): boolean;
+		getText(): string;
+		intersectsBufferRange(bufferRange: IRangeOrArray): boolean;
+		intersectsWith(otherSelection: Selection, exclusive?: boolean): boolean;
+
+		// Modifying the selected range
+
+		clear(options?: { autoscroll: boolean }): void;
+		selectToScreenPosition(position: IPointOrArray): void;
+		selectToBufferPosition(position: IPointOrArray): void;
+		selectRight(columnCount?: number): void;
+		selectLeft(columnCount?: number): void;
+		selectUp(rowCount?: number): void;
+		selectDown(rowCount?: number): void;
+		selectToTop(): void;
+		selectToBottom(): void;
+		selectAll(): void;
+		selectToBeginningOfLine(): void;
+		selectToFirstCharacterOfLine(): void;
+		selectToEndOfLine(): void;
+		selectToBeginningOfWord(): void;
+		selectToEndOfWord(): void;
+		selectToBeginningOfNextWord(): void;
+		selectToPreviousWordBoundary(): void;
+		selectToNextWordBoundary(): void;
+		selectToBeginningOfNextParagraph(): void;
+		selectToBeginningOfPreviousParagraph(): void;
+		selectWord(): IRange;
+		expandOverWord(): void;
+		selectLine(row: number): IRange;
+		expandOverLine(): void;
+
+		// Modifying the selected text
+
+		insertText(text: string, options?: ISelectionInsertTextOptions): IRange;
+		backspace(): void;
+		deleteToPreviousWordBoundary(): void;
+		deleteToNextWordBoundary(): void;
+		deleteToBeginningOfWord(): void;
+		deleteToBeginningOfLine(): void;
+		delete(): void;
+		deleteToEndOfLine(): void;
+		deleteToEndOfWord(): void;
+		deleteSelectedText(): void;
+		deleteLine(): void;
+		joinLines(): void;
+		outdentSelectedRows(): void;
+		autoIndentSelectedRows(): void;
+		toggleLineComments(): void;
+		cutToEndOfLine(maintainClipboard?: boolean): void;
+		cut(maintainClipboard?: boolean, fullLine?: boolean): void;
+		copy(maintainClipboard?: boolean, fullLine?: boolean): void;
+		fold(): void;
+		indent(options?: { autoIndent: boolean }): void;
+		indentSelectedRows(): void;
+
+		// Managing multiple selections
+
+		addSelectionBelow(): void;
+		addSelectionAbove(): void;
+		merge(otherSelection: Selection, options?: {
+			preserveFolds?: boolean;
+			autoscroll?: boolean;
+		}): void;
+
+		// Comparing to other selections
+
+		compare(otherSelection: Selection): number;
 	}
 
 	// DONE
@@ -471,6 +483,8 @@ declare module AtomCore {
 		onDidDestroy(callback: Function): Disposable;
 	}
 
+	// DONE
+	/** Static side of the TextEditor class. */
 	interface TextEditorStatic {
 		prototype: TextEditor;
 		new (params?: {
@@ -1431,6 +1445,7 @@ declare module AtomCore {
 		getUserStyleSheetPath(): string;
 	}
 
+	// DONE
 	/** Static side of the BufferedProcess class. */
 	interface BufferedProcessStatic {
 		prototype: BufferedProcess;
