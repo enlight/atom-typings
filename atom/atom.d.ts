@@ -21,7 +21,7 @@
 // be merged into the standard one. In Atom this stuff is implemented in window-bootstrap.coffee
 // and window.coffee.
 interface Window {
-	atom: AtomCore.IAtom;
+	atom: AtomCore.Atom;
 	/** Measures how long a function takes to run. */
 	measure<T>(description: string, fn: () => T): T;
 	/** Creates a dev tools profile for a function. */
@@ -30,10 +30,11 @@ interface Window {
 
 declare module AtomCore {
 
-	type IPoint = TextBuffer.IPoint;
-	type IRange = TextBuffer.IRange;
-	type IPointOrArray = TextBuffer.IPointOrArray;
-	type IRangeOrArray = TextBuffer.IRangeOrArray;
+	type IPoint = AtomTextBuffer.IPoint;
+	type IRange = AtomTextBuffer.IRange;
+	type IPointOrArray = AtomTextBuffer.IPointOrArray;
+	type IRangeOrArray = AtomTextBuffer.IRangeOrArray;
+	type TextBuffer = AtomTextBuffer.TextBuffer;
 	type Disposable = EventKit.Disposable;
 	type IGrammar = FirstMate.IGrammar;
 	type IKeymapManager = AtomKeyMap.KeymapManager;
@@ -41,7 +42,7 @@ declare module AtomCore {
 	type BrowserWindow = GitHubElectron.BrowserWindow;
 	type ISerializable = AtomSerializable.ISerializable;
 
-	interface IModel {
+	interface Model {
 		id: number;
 
 		destroy(): void;
@@ -50,7 +51,7 @@ declare module AtomCore {
 	}
 
 	// DONE
-	interface ICommandRegistry {
+	interface CommandRegistry {
 		add(target: string, commands: Object): Disposable;
 		add(target: string, commandName: string, callback: (e: Event) => void): Disposable;
 		findCommands(params: { target: Element }): Array<{name: string; displayName: string}>;
@@ -79,8 +80,8 @@ declare module AtomCore {
 	 * Note that much of the functionality provided by DisplayBuffer can be used indirectly via more
 	 * public classes such as TextEditor.
 	 */
-	interface IDisplayBuffer extends IModel, ISerializable {
-		copy(): IDisplayBuffer;
+	interface DisplayBuffer extends Model, ISerializable {
+		copy(): DisplayBuffer;
 		updateAllScreenLines(): void;
 
 		// Event Subscription
@@ -121,7 +122,7 @@ declare module AtomCore {
 		getScrollWidth(): number;
 		getVisibleRowRange(): number[];
 		intersectsVisibleRowRange(startRow: number, endRow: number): boolean;
-		selectionIntersectsVisibleRowRange(selection: ISelection): boolean;
+		selectionIntersectsVisibleRowRange(selection: Selection): boolean;
 		scrollToScreenRange(screenRange: IRange): number;
 		scrollToScreenPosition(screenPosition: IPointOrArray): number;
 		scrollToBufferPosition(bufferPosition: IPointOrArray): number;
@@ -135,17 +136,17 @@ declare module AtomCore {
 		getSoftWrapColumn(): number;
 		indentLevelForLine(line: string): number;
 		bufferRowsForScreenRows(startScreenRow: number, endScreenRow: number): number[];
-		createFold(startRow: number, endRow: number): IFold;
+		createFold(startRow: number, endRow: number): Fold;
 		isFoldedAtBufferRow(bufferRow: number): boolean;
 		isFoldedAtScreenRow(screenRow: number): boolean;
 		destroyFoldWithId(id: number): void;
 		unfoldBufferRow(bufferRow: number): void;
-		largestFoldStartingAtBufferRow(bufferRow: number): IFold;
-		foldsStartingAtBufferRow(bufferRow: number): IFold[];
-		largestFoldStartingAtScreenRow(screenRow: number): IFold;
-		largestFoldContainingBufferRow(bufferRow: number): IFold;
-		outermostFoldsInBufferRowRange(startRow: number, endRow: number): IFold[];
-		foldsContainingBufferRow(bufferRow: any): IFold[];
+		largestFoldStartingAtBufferRow(bufferRow: number): Fold;
+		foldsStartingAtBufferRow(bufferRow: number): Fold[];
+		largestFoldStartingAtScreenRow(screenRow: number): Fold;
+		largestFoldContainingBufferRow(bufferRow: number): Fold;
+		outermostFoldsInBufferRowRange(startRow: number, endRow: number): Fold[];
+		foldsContainingBufferRow(bufferRow: any): Fold[];
 		screenRowForBufferRow(bufferRow: number): number;
 		lastScreenRowForBufferRow(bufferRow: number): number;
 		bufferRowForScreenRow(screenRow: number): number;
@@ -161,7 +162,7 @@ declare module AtomCore {
 		screenPositionForBufferPosition(bufferPosition: IPointOrArray, options: any): IPoint;
 		bufferPositionForScreenPosition(screenPosition: IPointOrArray, options: any): IPoint;
 		bufferRangeForScopeAtPosition(selector: string, position: IPointOrArray): IRange;
-		tokenForBufferPosition(bufferPosition: IPointOrArray): IToken;
+		tokenForBufferPosition(bufferPosition: IPointOrArray): Token;
 		getGrammar(): IGrammar;
 		setGrammar(grammar: IGrammar): void;
 		reloadGrammar(): void;
@@ -193,14 +194,14 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for ViewRegistry class in Atom. */
-	interface IViewRegistry {
+	interface ViewRegistry {
 		addViewProvider(modelConstructor: Function, createView: (model: any) => HTMLElement): Disposable;
 		getView(model: any): HTMLElement;
 	}
 
 	// DONE
 	/** Interface for ScopeDescriptor class in Atom. */
-	interface IScopeDescriptor {
+	interface ScopeDescriptor {
 		getScopesArray(): string[];
   }
 
@@ -212,17 +213,17 @@ declare module AtomCore {
 		newScreenPosition: IPointOrArray;
 		textChanged: boolean;
 		/** The cursor that triggered the event. */
-		cursor: ICursor;
+		cursor: Cursor;
 	}
 
 	interface ICursorStatic {
-		new (arg: { editor: ITextEditor; marker: Marker; id: number }): ICursor;
+		new (arg: { editor: TextEditor; marker: Marker; id: number }): Cursor;
 	}
 
 	// DONE... but maybe ditch the constructor
 	/** Interface for Cursor class in Atom. */
-	interface ICursor extends IModel {
-		editor: ITextEditor;
+	interface Cursor extends Model {
+		editor: TextEditor;
 
 		constructor: ICursorStatic;
 		onDidChangePosition(callback: (e: ICursorChangeEvent) => void): Disposable;
@@ -246,7 +247,7 @@ declare module AtomCore {
 		isBetweenWordAndNonWord(): boolean;
 		isInsideWord(): boolean;
 		getIndentLevel(): number;
-		getScopeDescriptor(): IScopeDescriptor;
+		getScopeDescriptor(): ScopeDescriptor;
 		hasPrecedingCharactersOnLine(): boolean;
 		isLastCursor(): boolean;
 
@@ -293,7 +294,7 @@ declare module AtomCore {
 		updateVisibility(): void;
 
 		/** Compares this cursor's buffer position to another cursor's. */
-		compare(other: ICursor): boolean;
+		compare(other: Cursor): boolean;
 
 		/** Prevents the cursor from causing scrolling. */
 		clearAutoscroll(): void;
@@ -314,10 +315,10 @@ declare module AtomCore {
 	}
 
 	/** Interface for Selection class in Atom. */
-	interface ISelection extends IModel {
-		cursor: ICursor;
+	interface Selection extends Model {
+		cursor: Cursor;
 		marker: Marker;
-		editor: ITextEditor;
+		editor: TextEditor;
 		initialScreenRange: any;
 		wordwise: boolean;
 		needsAutoscroll: boolean;
@@ -397,7 +398,7 @@ declare module AtomCore {
 		newBufferRange: IRange;
 		newScreenRange: IRange;
 		/** The selection that triggered the event. */
-		selection: ISelection;
+		selection: Selection;
 	}
 
 	// DONE
@@ -422,11 +423,9 @@ declare module AtomCore {
 		}): void;
 	}
 
-	// DONE... but need to rename it to IDecoration and make it an interface
+	// DONE
 	/** A visual representation of a marker in the text editor. */
-	export class Decoration {
-		/** New instances should be constructed indirectly via the TextEditor class. */
-		constructor(marker: Marker, displayBuffer: IDisplayBuffer, properties: IDecorationParams);
+	interface Decoration {
 		/** Best practice is to destroy the decoration indirectly by destroying the marker. */
 		destroy(): void;
 		isDestroyed(): boolean;
@@ -441,11 +440,10 @@ declare module AtomCore {
 		setProperties(newProperties: IDecorationParams);
 	}
 
-	// DONE... but need to rename it to IGutterContainer and make it an interface
-	export class GutterContainer {
-		constructor(textEditor: ITextEditor);
+	// DONE
+	interface GutterContainer {
 		destroy(): void;
-		// all methods below are also currently available in ITextEditor
+		// all methods below are also currently available in TextEditor
 		addGutter(options: {
 			name: string;
 			priority?: number;
@@ -458,17 +456,12 @@ declare module AtomCore {
 		onDidRemoveGutter(callback: (name: string) => void): Disposable;
 	}
 
-	// DONE... but need to rename it to IGutter and make it an interface
+	// DONE
 	/** A gutter within a text editor. */
-	export class Gutter {
+	interface Gutter {
 		name: string;
 		gutterContainer: GutterContainer;
 
-		constructor(gutterContainer: GutterContainer, options: {
-			name: string;
-			priority?: number;
-			visible?: boolean;
-		});
 		destroy(): void;
 		hide(): void;
 		show(): void;
@@ -478,9 +471,33 @@ declare module AtomCore {
 		onDidDestroy(callback: Function): Disposable;
 	}
 
-	// DONE... but need to rename to TextEditor and make it a class
-	/** Interface for TextEditor class in Atom. */
-	interface ITextEditor extends IModel, ISerializable {
+	interface TextEditorStatic {
+		prototype: TextEditor;
+		new (params?: {
+			softTabs: boolean;
+			initialLine: number;
+			initialColumn: number;
+			tabLength: number;
+			softWrapped: boolean;
+			displayBuffer: DisplayBuffer;
+			buffer: TextBuffer;
+			registerEditor: boolean;
+			suppressCursorCreation: boolean;
+			mini: boolean;
+			placeholderText: string;
+			lineNumberGutterVisible: boolean;
+			largeFileMode: boolean;
+		}): TextEditor;
+	}
+
+	// DONE
+	/**
+	 * Represents all essential editing state for a single text buffer, including cursors,
+	 * selections, folds, and soft wraps.
+	 */
+	interface TextEditor extends Model, ISerializable {
+		constructor: TextEditorStatic;
+
 		// Event Subscription
 
 		onDidChangeTitle(callback: Function): Disposable;
@@ -499,12 +516,12 @@ declare module AtomCore {
 		onDidInsertText(callback: (e: { text: string }) => void): Disposable;
 		onDidSave(callback: (e: { path: string }) => void): Disposable;
 		onDidDestroy(callback: Function): Disposable;
-		observeCursors(callback: (cursor: ICursor) => void): Disposable;
-		onDidAddCursor(callback: (cursor: ICursor) => void): Disposable;
-		onDidRemoveCursor(callback: (cursor: ICursor) => void): Disposable;
-		observeSelections(callback: (selection: ISelection) => void): Disposable;
-		onDidAddSelection(callback: (selection: ISelection) => void): Disposable;
-		onDidRemoveSelection(callback: (selection: ISelection) => void): Disposable;
+		observeCursors(callback: (cursor: Cursor) => void): Disposable;
+		onDidAddCursor(callback: (cursor: Cursor) => void): Disposable;
+		onDidRemoveCursor(callback: (cursor: Cursor) => void): Disposable;
+		observeSelections(callback: (selection: Selection) => void): Disposable;
+		onDidAddSelection(callback: (selection: Selection) => void): Disposable;
+		onDidRemoveSelection(callback: (selection: Selection) => void): Disposable;
 		observeDecorations(callback: (decoration: Decoration) => void): Disposable;
 		onDidAddDecoration(callback: (decoration: Decoration) => void): Disposable;
 		onDidRemoveDecoration(callback: (decoration: Decoration) => void): Disposable;
@@ -515,10 +532,10 @@ declare module AtomCore {
 		onDidChangeIcon(callback: Function): Disposable;
 		onDidUpdateMarkers(callback: Function): Disposable;
 
-		getBuffer(): TextBuffer.ITextBuffer;
+		getBuffer(): TextBuffer;
 		getURI(): string;
 		/** Creates a new text editor with an initial state based on this one. */
-		copy(): ITextEditor;
+		copy(): TextEditor;
 		setVisible(visible: boolean): void;
 		setLineNumberGutterVisible(visible: boolean): boolean;
 		isLineNumberGutterVisible(): boolean;
@@ -565,8 +582,8 @@ declare module AtomCore {
 		getLastScreenRow(): number;
 		lineTextForBufferRow(bufferRow: number): string;
 		lineTextForScreenRow(screenRow: number): string;
-		tokenizedLineForScreenRow(screenRow: number): ITokenizedLine;
-		tokenizedLinesForScreenRows(start: number, end: number): ITokenizedLine[];
+		tokenizedLineForScreenRow(screenRow: number): TokenizedLine;
+		tokenizedLinesForScreenRows(start: number, end: number): TokenizedLine[];
 		bufferRowForScreenRow(screenRow: number): number;
 		bufferRowsForScreenRows(startRow, endRow): number[];
 		screenRowForBufferRow(bufferRow: number): number;
@@ -592,7 +609,7 @@ declare module AtomCore {
 		insertNewline(): IRange[] | boolean;
 		delete(): void;
 		backspace(): void;
-		mutateSelectedText<T>(fn: (selection: ISelection, index: number) => T, groupingInterval: number): T[];
+		mutateSelectedText<T>(fn: (selection: Selection, index: number) => T, groupingInterval: number): T[];
 		moveLineUp(): void;
 		moveLineDown(): void;
 		duplicateLines(): void;
@@ -668,12 +685,12 @@ declare module AtomCore {
 		getCursorBufferPosition(): IPoint;
 		getCursorBufferPositions(): IPoint[];
 		setCursorBufferPosition(position: IPointOrArray, options?: { autoscroll: boolean }): void;
-		getCursorAtScreenPosition(position: IPointOrArray): ICursor;
+		getCursorAtScreenPosition(position: IPointOrArray): Cursor;
 		getCursorScreenPosition(): IPoint;
 		getCursorScreenPositions(): IPoint[];
 		setCursorScreenPosition(position: IPointOrArray, options?: { autoscroll: boolean }): void;
-		addCursorAtBufferPosition(bufferPosition: IPointOrArray, options?: { autoscroll: boolean }): ICursor;
-		addCursorAtScreenPosition(screenPosition: IPointOrArray, options?: { autoscroll: boolean }): ICursor;
+		addCursorAtBufferPosition(bufferPosition: IPointOrArray, options?: { autoscroll: boolean }): Cursor;
+		addCursorAtScreenPosition(screenPosition: IPointOrArray, options?: { autoscroll: boolean }): Cursor;
 		hasMultipleCursors(): boolean;
 		moveUp(lineCount?: number): void;
 		moveDown(lineCount?: number): void;
@@ -693,13 +710,13 @@ declare module AtomCore {
 		moveToNextWordBoundary(): void;
 		moveToBeginningOfNextParagraph(): void;
 		moveToBeginningOfPreviousParagraph(): void;
-		getLastCursor(): ICursor;
+		getLastCursor(): Cursor;
 		getWordUnderCursor(options?: { wordRegex: RegExp }): string;
-		getCursors(): ICursor[];
-		getCursorsOrderedByBufferPosition(): ICursor[];
-		addCursor(marker: Marker): ICursor;
-		removeCursor(cursor: ICursor): void;
-		moveCursors(fn: (cursor: ICursor) => void): void;
+		getCursors(): Cursor[];
+		getCursorsOrderedByBufferPosition(): Cursor[];
+		addCursor(marker: Marker): Cursor;
+		removeCursor(cursor: Cursor): void;
+		moveCursors(fn: (cursor: Cursor) => void): void;
 		mergeCursors(): void;
 		preserveCursorPositionOnBufferReload(): void;
 
@@ -714,8 +731,8 @@ declare module AtomCore {
 		getSelectedScreenRanges(): IRange[];
 		setSelectedScreenRange(screenRange: IRangeOrArray, options?: { reversed: boolean }): void;
 		setSelectedScreenRanges(screenRanges: IRangeOrArray[], options?: { reversed: boolean }): void;
-		addSelectionForBufferRange(bufferRange: IRangeOrArray, options?: { reversed: boolean }): ISelection;
-		addSelectionForScreenRange(screenRange: IRangeOrArray, options?: { reversed: boolean }): ISelection;
+		addSelectionForBufferRange(bufferRange: IRangeOrArray, options?: { reversed: boolean }): Selection;
+		addSelectionForScreenRange(screenRange: IRangeOrArray, options?: { reversed: boolean }): Selection;
 		selectToBufferPosition(position: IPointOrArray): void;
 		selectToScreenPosition(position: IPointOrArray): void;
 		selectUp(rowCount?: number): void;
@@ -738,9 +755,9 @@ declare module AtomCore {
 		selectToBeginningOfNextParagraph(): void;
 		selectToBeginningOfPreviousParagraph(): void;
 		selectMarker(marker: Marker): IRange;
-		getLastSelection(): ISelection;
-		getSelections(): ISelection[];
-		getSelectionsOrderedByBufferPosition(): ISelection[];
+		getLastSelection(): Selection;
+		getSelections(): Selection[];
+		getSelectionsOrderedByBufferPosition(): Selection[];
 		selectionIntersectsBufferRange(bufferRange: IRangeOrArray): boolean;
 
 		// Search and Replace
@@ -786,12 +803,12 @@ declare module AtomCore {
 
 		// Syntax Scopes
 
-		getRootScopeDescriptor(): IScopeDescriptor;
-		scopeDescriptorForBufferPosition(bufferPosition: IPointOrArray): IScopeDescriptor;
+		getRootScopeDescriptor(): ScopeDescriptor;
+		scopeDescriptorForBufferPosition(bufferPosition: IPointOrArray): ScopeDescriptor;
 		bufferRangeForScopeAtCursor(scopeSelector: string): IRange;
 		isBufferRowCommented(bufferRow: number): boolean;
 		logCursorScope(): void;
-		tokenForBufferPosition(bufferPosition: IPointOrArray): IToken;
+		tokenForBufferPosition(bufferPosition: IPointOrArray): Token;
 
 		// Clipboard Operations
 
@@ -802,9 +819,9 @@ declare module AtomCore {
 
 		// Folding
 
-		foldCurrentRow(): IFold;
+		foldCurrentRow(): Fold;
 		unfoldCurrentRow(): void;
-		foldBufferRow(bufferRow: number): IFold;
+		foldBufferRow(bufferRow: number): Fold;
 		unfoldBufferRow(bufferRow: number): void;
 		foldSelectedLines(): void;
 		foldAll(): void;
@@ -812,16 +829,16 @@ declare module AtomCore {
 		foldAllAtIndentLevel(level: number): void;
 		isFoldableAtBufferRow(bufferRow: number): boolean;
 		isFoldableAtScreenRow(screenRow: number): boolean;
-		toggleFoldAtBufferRow(bufferRow: number): IFold | void;
+		toggleFoldAtBufferRow(bufferRow: number): Fold | void;
 		isFoldedAtCursorRow(bufferRow: number): boolean;
 		isFoldedAtScreenRow(screenRow: number): boolean;
-		createFold(startRow: number, endRow: number): IFold;
+		createFold(startRow: number, endRow: number): Fold;
 		destroyFoldWithId(id: number): void;
 		destroyFoldsIntersectingBufferRange(bufferRange: IRangeOrArray): void;
 		destroyFoldsContainingBufferRange(bufferRange: IRangeOrArray): void;
-		largestFoldContainingBufferRow(bufferRow: number): IFold;
-		largestFoldStartingAtScreenRow(screenRow: number): IFold;
-		outermostFoldsInBufferRowRange(startRow: number, endRow: number): IFold[];
+		largestFoldContainingBufferRow(bufferRow: number): Fold;
+		largestFoldStartingAtScreenRow(screenRow: number): Fold;
+		outermostFoldsInBufferRowRange(startRow: number, endRow: number): Fold[];
 
 		// Scrolling
 
@@ -870,7 +887,7 @@ declare module AtomCore {
 
 	// DONE
 	/** A container that displays content at the center of the workspace. */
-	interface IPane extends IModel, ISerializable {
+	interface Pane extends Model, ISerializable {
 		// Event Subscription
 
 		onDidChangeFlexScale(callback: (flexScale: number) => void): Disposable;
@@ -891,7 +908,7 @@ declare module AtomCore {
 
 		getItems(): any[];
 		getActiveItem(): any;
-		getActiveEditor(): ITextEditor;
+		getActiveEditor(): TextEditor;
 		itemAtIndex(index: number): any;
 		activateNextItem(): any;
 		activatePreviousItem(): any;
@@ -903,7 +920,7 @@ declare module AtomCore {
 		addItem(item: any, index?: number): any;
 		addItems(items: any[], index?: number): any[];
 		moveItem(item: any, index: number): void;
-		moveItemToPane(item: any, pane: IPane, index: number): any;
+		moveItemToPane(item: any, pane: Pane, index: number): any;
 		/** Note that the return value doesn't represent success/failure, just ignore it. */
 		destroyActiveItem(): boolean;
 		destroyItem(item: any): boolean;
@@ -924,27 +941,15 @@ declare module AtomCore {
 
 		// Splitting
 
-		splitLeft(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
-		splitRight(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
-		splitUp(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
-		splitDown(params?: { items?: any[], copyActiveItem?: boolean }): IPane;
-	}
-
-	// DONE
-	// see <https://atom.io/docs/v0.186.0/advanced/serialization>
-	interface IAtomSerializableStatic<T> {
-		deserialize(state: ISerializedState): T;
-		new (data: T): IAtomSerializable;
-	}
-
-	// DONE
-	interface IAtomSerializable {
-		serialize(): ISerializedState;
+		splitLeft(params?: { items?: any[], copyActiveItem?: boolean }): Pane;
+		splitRight(params?: { items?: any[], copyActiveItem?: boolean }): Pane;
+		splitUp(params?: { items?: any[], copyActiveItem?: boolean }): Pane;
+		splitDown(params?: { items?: any[], copyActiveItem?: boolean }): Pane;
 	}
 
 	// DONE
 	/** Interface for Project class in Atom. */
-	interface IProject extends IModel, ISerializable {
+	interface Project extends Model, ISerializable {
 		onDidChangePaths(callback: (projectPaths: string[]) => void): Disposable;
 		repositoryForDirectory(directory: Directory): Q.Promise<any /* Repository */>;
 		getPaths(): string[];
@@ -965,10 +970,10 @@ declare module AtomCore {
 
 	// DONE
 	/** A container on the edge of an editor window. */
-	interface IPanel {
+	interface Panel {
 		destroy(): void;
 		onDidChangeVisible(callback: (visible: boolean) => void): Disposable;
-		onDidDestroy(callback: (panel: IPanel) => void): Disposable;
+		onDidDestroy(callback: (panel: Panel) => void): Disposable;
 		getItem(): any;
 		getPriority(): number;
 		isVisible(): boolean;
@@ -979,7 +984,7 @@ declare module AtomCore {
 	// DONE
 	interface IPaneItemEvent {
 		item: any;
-		pane: IPane;
+		pane: Pane;
 		index: number;
 	}
 
@@ -1020,25 +1025,25 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for Workspace class in Atom. */
-	interface IWorkspace extends IModel, ISerializable {
+	interface Workspace extends Model, ISerializable {
 		// Event Subscription
 
-		observeTextEditors(callback: (editor: ITextEditor) => void): Disposable;
-		observePaneItems(callback: (item: IPane) => void): Disposable;
-		onDidChangeActivePaneItem(callback: (item: IPane) => void): Disposable;
-		observeActivePaneItem(callback: (item: IPane) => void): Disposable;
+		observeTextEditors(callback: (editor: TextEditor) => void): Disposable;
+		observePaneItems(callback: (item: Pane) => void): Disposable;
+		onDidChangeActivePaneItem(callback: (item: Pane) => void): Disposable;
+		observeActivePaneItem(callback: (item: Pane) => void): Disposable;
 		onDidOpen(callback: (event: IPaneItemOpenEvent) => void): Disposable;
-		onDidAddPane(callback: (event: { pane: IPane }) => void): Disposable;
-		onDidDestroyPane(callback: (event: { pane: IPane }) => void): Disposable;
-		observePanes(callback: (pane: IPane) => void): Disposable;
-		onDidChangeActivePane(callback: (pane: IPane) => void): Disposable;
-		observeActivePane(callback: (pane: IPane) => void): Disposable;
+		onDidAddPane(callback: (event: { pane: Pane }) => void): Disposable;
+		onDidDestroyPane(callback: (event: { pane: Pane }) => void): Disposable;
+		observePanes(callback: (pane: Pane) => void): Disposable;
+		onDidChangeActivePane(callback: (pane: Pane) => void): Disposable;
+		observeActivePane(callback: (pane: Pane) => void): Disposable;
 		onDidAddPaneItem(callback: (event: IPaneItemEvent) => void): Disposable;
 		onWillDestroyPaneItem(callback: (event: IPaneItemEvent) => void): Disposable;
 		onDidDestroyPaneItem(callback: (event: IPaneItemEvent) => void): Disposable;
 		onDidAddTextEditor(callback: (event: {
-			textEditor: ITextEditor;
-			pane: IPane;
+			textEditor: TextEditor;
+			pane: Pane;
 			index: number;
 		}) => void): Disposable;
 
@@ -1063,8 +1068,8 @@ declare module AtomCore {
 
 		getPaneItems(): any[];
 		getActivePaneItem(): any;
-		getTextEditors(): ITextEditor[];
-		getActiveTextEditor(): ITextEditor;
+		getTextEditors(): TextEditor[];
+		getActiveTextEditor(): TextEditor;
 		saveAll(): void;
 		saveActivePaneItem(): void;
 		saveActivePaneItemAs(): void;
@@ -1072,28 +1077,28 @@ declare module AtomCore {
 
 		// Panes
 
-		getPanes(): IPane[];
-		getActivePane(): IPane;
+		getPanes(): Pane[];
+		getActivePane(): Pane;
 		activateNextPane(): boolean;
 		activatePreviousPane(): boolean;
-		paneForURI(uri: string): IPane;
-		paneForItem(item: any): IPane;
+		paneForURI(uri: string): Pane;
+		paneForItem(item: any): Pane;
 		destroyActivePane(): void;
 		destroyActivePaneItemOrEmptyPane(): void;
 
 		// Panels
 
-		getBottomPanels(): IPanel[];
-		addBottomPanel(options: IWorkspacePanelOptions): IPanel;
-		getLeftPanels(): IPanel[];
-		addLeftPanel(options: IWorkspacePanelOptions): IPanel;
-		getRightPanels(): IPanel[];
-		addRightPanel(options: IWorkspacePanelOptions): IPanel;
-		getTopPanels(): IPanel[];
-		addTopPanel(options: IWorkspacePanelOptions): IPanel;
-		getModalPanels(): IPanel[];
-		addModalPanel(options: IWorkspacePanelOptions): IPanel;
-		panelForItem(item: any): IPanel;
+		getBottomPanels(): Panel[];
+		addBottomPanel(options: IWorkspacePanelOptions): Panel;
+		getLeftPanels(): Panel[];
+		addLeftPanel(options: IWorkspacePanelOptions): Panel;
+		getRightPanels(): Panel[];
+		addRightPanel(options: IWorkspacePanelOptions): Panel;
+		getTopPanels(): Panel[];
+		addTopPanel(options: IWorkspacePanelOptions): Panel;
+		getModalPanels(): Panel[];
+		addModalPanel(options: IWorkspacePanelOptions): Panel;
+		panelForItem(item: any): Panel;
 
 		// Search and Replace
 
@@ -1151,7 +1156,7 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for DeserializerManager class in Atom. */
-	interface IDeserializerManager {
+	interface DeserializerManager {
 		add(...deserializers: IDeserializer[]): Disposable;
 		deserialize(state: ISerializedState, params?: any): any;
 		get(state: ISerializedState): IDeserializer;
@@ -1164,28 +1169,28 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for Config class in Atom. */
-	interface IConfig {
+	/** Provides access to all Atom configuration details. */
+	interface Config {
 		// Event Subscription
 
 		observe(keyPath: string, callback: (newValue: any) => void): Disposable;
-		observe(keyPath: string, options: { scopeDescriptor: IScopeDescriptor }, callback: (newValue: any) => void): Disposable;
+		observe(keyPath: string, options: { scopeDescriptor: ScopeDescriptor }, callback: (newValue: any) => void): Disposable;
 		onDidChange(callback: (e: IConfigChangeEvent) => void): Disposable;
 		onDidChange(keyPath: string, callback: (e: IConfigChangeEvent) => void): Disposable;
-		onDidChange(keyPath: string, options: { scopeDescriptor: IScopeDescriptor }, callback: (e: IConfigChangeEvent) => void): Disposable;
+		onDidChange(keyPath: string, options: { scopeDescriptor: ScopeDescriptor }, callback: (e: IConfigChangeEvent) => void): Disposable;
 
 		// Settings Management
 
 		get(keyPath: string, options?: {
 			sources?: string[];
 			excludeSources?: string[];
-			scope?: IScopeDescriptor;
+			scope?: ScopeDescriptor;
 		}): any;
 		getAll(keyPath: string, options?: {
 			sources?: string[];
 			excludeSources?: string[];
-			scope?: IScopeDescriptor;
-		}): Array<{ scopeDescriptor: IScopeDescriptor; value: any }>;
+			scope?: ScopeDescriptor;
+		}): Array<{ scopeDescriptor: ScopeDescriptor; value: any }>;
 		set(keyPath: string, value: any, options?: {
 			scopeSelector?: string;
 			source?: string;
@@ -1198,20 +1203,23 @@ declare module AtomCore {
 	}
 
 	// DONE
-	// Interface for Package class in Atom
-	interface IPackage {
+	/**
+	 * Loads and activates an Atom package's main module and resources such as
+	 * stylesheets, keymaps, grammar, editor properties, and menus.
+	 */
+	interface Package {
 		/** Is this package compatible with this version of Atom? */
 		isCompatible(): boolean;
 	}
 
 	// DONE
-	// Interface for ThemePackage class in Atom
-	interface IThemePackage extends IPackage {
+	/** Interface for ThemePackage class in Atom. */
+	interface ThemePackage extends Package {
 	}
 
 	// DONE
-	// Interface for PackageManager class in Atom
-	interface IPackageManager {
+	/** Coordinates the lifecycle of Atom packages. */
+	interface PackageManager {
 		/** Invokes the given callback when all packages have been loaded. */
 		onDidLoadInitialPackages(callback: Function): Disposable;
 		/** Invokes the given callback when all packages have been activated. */
@@ -1239,28 +1247,28 @@ declare module AtomCore {
 		 * Enable the package with the given name.
 		 * @return The package that was enabled or null if it's not loaded.
 		 */
-		enablePackage(name: string): IPackage;
+		enablePackage(name: string): Package;
 		/**
 		 * Disable the package with the given name.
 		 * @return The package that was disabled or null if it's not loaded.
 		 */
-		disablePackage(name: string): IPackage;
+		disablePackage(name: string): Package;
 		/** Is the package with the given name disabled? */
 		isPackageDisabled(name: string): boolean;
 
 		/** Get an array of active packages. */
-		getActivePackages(): IPackage[];
+		getActivePackages(): Package[];
 		/** Get an active package with the given name. */
-		getActivePackage(name: string): IPackage;
+		getActivePackage(name: string): Package;
 		/** Is the package with the given name active? */
 		isPackageActive(name: string): boolean;
 
 		/** Get an array of all loaded packages. */
-		getLoadedPackages(): IPackage[];
+		getLoadedPackages(): Package[];
 		/** Get all loaded packages of a certain type. */
-		getLoadedPackagesForTypes(types: string[]): IPackage[];
+		getLoadedPackagesForTypes(types: string[]): Package[];
 		/** Get a loaded package matching the given name. */
-		getLoadedPackage(name: string): IPackage;
+		getLoadedPackage(name: string): Package;
 		/** Is the package with the given name loaded? */
 		isPackageLoaded(name: string): boolean;
 
@@ -1273,26 +1281,26 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for ThemeManager class in Atom. */
-	interface IThemeManager {
+	/** Loads and activates Atom themes. */
+	interface ThemeManager {
 		onDidChangeActiveThemes(callback: Function): Disposable;
 
 		getLoadedThemeNames(): string[];
-		getLoadedThemes(): IThemePackage[];
+		getLoadedThemes(): ThemePackage[];
 		getActiveThemeNames(): string[];
-		getActiveThemes(): IThemePackage[];
+		getActiveThemes(): ThemePackage[];
 
 		getEnabledThemeNames(): string[];
 	}
 
 	// DONE
-	/** Interface for ContextMenuManager class in Atom. */
-	interface IContextMenuManager {
+	/** A registry of commands that can be accessed via a context menu. */
+	interface ContextMenuManager {
 		add(itemsBySelector: any): Disposable;
 	}
 
 	// DONE
-	/** Interface for items specified within the `itemsBySelector` argument of `IContextMenuManager.add()`. */
+	/** Interface for items specified within the `itemsBySelector` argument of `ContextMenuManager.add()`. */
 	interface IContextMenuItem {
 		label?: string;
 		command?: string;
@@ -1303,7 +1311,7 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for items passed to `IMenuManager.add()`. */
+	/** Interface for items passed to `MenuManager.add()`. */
 	interface IMenuItem {
 		label: string;
 		submenu?: IMenuItem[];
@@ -1311,15 +1319,15 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for MenuManager class in Atom. */
-	interface IMenuManager {
+	/** A registry of commands that can be accessed via the application menu. */
+	interface MenuManager {
 		add(items: IMenuItem[]): Disposable;
 		update(): void;
 	}
 
 	// DONE
-	/** Interface for Clipboard class in Atom. */
-	interface IClipboard {
+	/** Provides access to the clipboard for copy/pasting. */
+	interface Clipboard {
 		md5(text: string): string;
 		write(text: string, metadata?: any): void;
 		read(): string;
@@ -1336,7 +1344,7 @@ declare module AtomCore {
 
 	// DONE
 	/** Interface for StorageFolder class in Atom. */
-	interface IStorageFolder {
+	interface StorageFolder {
 		store(name: string, value: any): void;
 		load(name: string): any;
 		pathForKey(name: string): string;
@@ -1344,8 +1352,8 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for TooltipManager class in Atom. */
-	interface ITooltipManager {
+	/** Associates tooltips with HTML elements or selectors. */
+	interface TooltipManager {
 		add(target: HTMLElement, options: any): Disposable;
 	}
 
@@ -1356,9 +1364,16 @@ declare module AtomCore {
 		icon?: string;
 	}
 
+	interface NotificationStatic {
+		prototype: Notification;
+		new (type: string, message: string, options?: INotificationOptions): Notification;
+	}
+
 	// DONE
-	export class Notification {
-		constructor(type: string, message: string, options?: INotificationOptions);
+	/** A notification to the user containing a message and type. */
+	interface Notification {
+		constructor: NotificationStatic;
+
 		onDidDismiss(callback: (notification: Notification) => void): Disposable;
 		onDidDisplay(callback: (notification: Notification) => void): Disposable;
 		getOptions(): INotificationOptions;
@@ -1376,8 +1391,8 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for NotificationManager class in Atom. */
-	interface INotificationManager {
+	/** Creates notifications to be shown to the user. */
+	interface NotificationManager {
 		onDidAddNotification(callback: (notification: Notification) => void): Disposable;
 		addSuccess(message: string, options?: INotificationOptions): Disposable;
 		addInfo(message: string, options?: INotificationOptions): Disposable;
@@ -1393,8 +1408,8 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for GrammarRegistry class in Atom. */
-	interface IGrammarRegistry /*extends FirstMate.GrammarRegistry*/ {
+	/** A registry of grammars used for tokenizing. */
+	interface GrammarRegistry extends IAtomSerializable /*, FirstMate.GrammarRegistry*/ {
 		selectGrammar(filePath: string, fileContents: string): IGrammar;
 	}
 
@@ -1405,8 +1420,8 @@ declare module AtomCore {
 	}
 
 	// DONE
-	/** Interface for StyleManager class in Atom. */
-	interface IStyleManager {
+	/** Allows to query and observe the set of active style sheets. */
+	interface StyleManager {
 		observeStyleElements(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
 		onDidAddStyleElement(callback): Disposable;
 		onDidRemoveStyleElement(callback): Disposable;
@@ -1458,26 +1473,23 @@ declare module AtomCore {
 	interface BufferedNodeProcess extends BufferedProcess {
 	}
 
-	interface ITokenizedBuffer extends IModel, ISerializable {
+	interface TokenizedBuffer extends Model, ISerializable {
 		// TBD
 	}
 
-	interface ITokenizedLine {
+	interface TokenizedLine {
 		// TBD
 	}
 
-	interface IToken {
+	interface Token {
 		// TBD
 	}
 
 	// DONE
-	/**
-	 * Collapses multiple buffer lines into a single line on screen.
-	 * See `Fold` class in Atom core for details.
-	 */
-	interface IFold {
+	/** Collapses multiple buffer lines into a single line on screen. */
+	interface Fold {
 		id: number;
-		displayBuffer: IDisplayBuffer;
+		displayBuffer: DisplayBuffer;
 		marker: Marker;
 
 		isInsideLargerFold(): boolean;
@@ -1489,7 +1501,7 @@ declare module AtomCore {
 		getEndRow(): number;
 		inspect(): string;
 		getBufferRowCount(): number;
-		isContainedByFold(fold: IFold): boolean;
+		isContainedByFold(fold: Fold): boolean;
 	}
 
 	// DONE
@@ -1512,13 +1524,14 @@ declare module AtomCore {
 	}
 
 	// previously known as IDisplayBufferMarker
-	export class Marker {
+	/** A buffer annotation that remains logically stationary as the buffer changes. */
+	interface Marker {
 		id: number;
-		bufferMarker: TextBuffer.IMarker;
-		displayBuffer: IDisplayBuffer;
+		bufferMarker: AtomTextBuffer.IMarker;
+		displayBuffer: DisplayBuffer;
 
 		/** New instances should be constructed indirectly via the TextEditor class. */
-		constructor(args: { bufferMarker: TextBuffer.IMarker; displayBuffer: IDisplayBuffer });
+		constructor(args: { bufferMarker: AtomTextBuffer.IMarker; displayBuffer: DisplayBuffer });
 		/** Destroys the marker after which the marker cannot be restored by undo/redo operations. */
 		destroy(): void;
 		/** Creates and returns a new marker with the same properties as this one. */
@@ -1591,41 +1604,54 @@ declare module AtomCore {
 	}
 
 	// DONE
-	interface IAtomStatic extends IAtomSerializableStatic<IAtom> {
+	// see <https://atom.io/docs/v0.186.0/advanced/serialization>
+	interface IAtomSerializableStatic<T> {
+		deserialize(state: ISerializedState): T;
+		new (data: T): IAtomSerializable;
+	}
+
+	// DONE
+	interface IAtomSerializable {
+		serialize(): ISerializedState;
+	}
+
+	// DONE
+	interface AtomStatic extends IAtomSerializableStatic<Atom> {
 		version: number;
 
-		loadOrCreate(mode: string): IAtom;
+		loadOrCreate(mode: string): Atom;
 		loadState(mode: any): void;
 		getStateKey(paths: string[], mode: string): string;
 		getConfigDirPath(): string;
-		getStorageFolder(): IStorageFolder;
+		getStorageFolder(): StorageFolder;
 		getLoadSettings(): IAtomSettings;
 		updateLoadSettings(key: string, value: any): void;
 		getCurrentWindow(): BrowserWindow;
 
-		new(state: IAtomState): IAtom;
+		prototype: Atom;
+		new (state: IAtomState): Atom;
 	}
 
 	// DONE
-	interface IAtom extends IModel {
-		commands: ICommandRegistry;
-		config: IConfig;
-		clipboard: IClipboard;
-		contextManu: IContextMenuManager;
-		menu: IMenuManager;
+	interface Atom extends Model {
+		commands: CommandRegistry;
+		config: Config;
+		clipboard: Clipboard;
+		contextManu: ContextMenuManager;
+		menu: MenuManager;
 		keymaps: IKeymapManager;
-		tooltips: ITooltipManager;
-		notifications: INotificationManager;
-		project: IProject;
-		grammars: IGrammarRegistry;
-		packages: IPackageManager;
-		themes: IThemeManager;
-		styles: IStyleManager;
-		deserializers: IDeserializerManager;
-		views: IViewRegistry;
-		workspace: IWorkspace;
+		tooltips: TooltipManager;
+		notifications: NotificationManager;
+		project: Project;
+		grammars: GrammarRegistry;
+		packages: PackageManager;
+		themes: ThemeManager;
+		styles: StyleManager;
+		deserializers: DeserializerManager;
+		views: ViewRegistry;
+		workspace: Workspace;
 
-		constructor: IAtomStatic;
+		constructor: AtomStatic;
 		initialize(): void;
 
 		// Event Subscription
@@ -1714,16 +1740,16 @@ declare module AtomCore {
 	}
 } // AtomCore
 
-declare var atom: AtomCore.IAtom;
+declare var atom: AtomCore.Atom;
 
 declare module "atom" {
 	var BufferedNodeProcess: AtomCore.BufferedNodeProcessStatic;
 	var BufferedProcess: AtomCore.BufferedProcessStatic;
 	// TODO: var GitRepository
-	var Notification: typeof AtomCore.Notification;
-	var TextBuffer: TextBuffer.ITextBufferStatic;
-	var Point: TextBuffer.IPointStatic;
-	var Range: TextBuffer.IRangeStatic;
+	var Notification: AtomCore.NotificationStatic;
+	var TextBuffer: AtomTextBuffer.ITextBufferStatic;
+	var Point: AtomTextBuffer.IPointStatic;
+	var Range: AtomTextBuffer.IRangeStatic;
 	var File: PathWatcher.IFileStatic;
 	var Directory: PathWatcher.IDirectoryStatic;
 	var Emitter: typeof EventKit.Emitter;
@@ -1731,5 +1757,5 @@ declare module "atom" {
 	var CompositeDisposable: typeof EventKit.CompositeDisposable;
 	// NOTE: The following are only available when NOT running as a child Node process.
 	var Task: AtomCore.TaskStatic;
-	// TODO: var TextEditor
+	var TextEditor: AtomCore.TextEditorStatic;
 }
