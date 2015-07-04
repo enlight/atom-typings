@@ -1542,12 +1542,29 @@ declare module AtomCore {
 		clearTail(properties?: any): boolean;
 	}
 
-	interface ITaskStatic {
-		new(taskPath:any):ITask;
+	// DONE
+	/** Static side of the Task class. */
+	interface TaskStatic {
+		prototype: Task;
+		new (taskPath: string): Task;
+
+		once(taskPath: string, ...args: any[]): Task;
 	}
 
-	interface ITask {
-		// TBD
+	// DONE
+	/** Runs a Node script in a separate process. */
+	interface Task {
+		constructor: TaskStatic;
+		/**
+		 * Starts the task.
+		 * @param args Arguments to pass to the function exported by this task's script.
+		 *             Note that if the last argument is a function it will be called when the task
+		 *             completes.
+		 */
+		start(...args: any[]): void;
+		send(message: any): void;
+		on(eventName: string, callback: Function): Disposable;
+		terminate(): boolean;
 	}
 
 	// DONE
@@ -1689,6 +1706,7 @@ declare module "atom" {
 	var Emitter: typeof EventKit.Emitter;
 	var Disposable: typeof EventKit.Disposable;
 	var CompositeDisposable: typeof EventKit.CompositeDisposable;
-	var Task: AtomCore.ITaskStatic;
+	// NOTE: The following are only available when NOT running as a child Node process.
+	var Task: AtomCore.TaskStatic;
 	// TODO: var TextEditor
 }
