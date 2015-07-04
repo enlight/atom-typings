@@ -1416,23 +1416,46 @@ declare module AtomCore {
 		getUserStyleSheetPath(): string;
 	}
 
-	interface IBufferedNodeProcessStatic {
-		new (arg:any):IBufferedNodeProcess;
+	/** Static side of the BufferedProcess class. */
+	interface BufferedProcessStatic {
+		prototype: BufferedProcess;
+		new (options: {
+			command: string;
+			args?: any[];
+			options?: any;
+			stdout?: (data: string) => void;
+			stderr?: (data: string) => void;
+			exit?: (code: number) => void;
+		}): BufferedProcess;
 	}
 
-	interface IBufferedNodeProcess extends IBufferedProcess {
+	// DONE
+	/** Wraps a Node child process in order to provide standard error/output line buffering. */
+	interface BufferedProcess {
+		onWillThrowError(callback: (errorObject: {
+			error: Error;
+			handle: Function;
+		}) => void): Disposable;
+		kill(): void;
 	}
 
-	interface IBufferedProcessStatic {
-		new (arg:any):IBufferedProcess;
+	// DONE
+	/** Static side of the BufferedNodeProcess class. */
+	interface BufferedNodeProcessStatic {
+		prototype: BufferedNodeProcess;
+		new (options: {
+			command: string;
+			args?: any[];
+			options?: any;
+			stdout?: (data: string) => void;
+			stderr?: (data: string) => void;
+			exit?: (code: number) => void;
+		}): BufferedNodeProcess;
 	}
 
-	interface IBufferedProcess {
-		process:Function;
-		killed:boolean;
-
-		bufferStream:Function;
-		kill:Function;
+	// DONE
+	/** Like [[BufferedProcess]] but accepts a Node script as the command to run. */
+	interface BufferedNodeProcess extends BufferedProcess {
 	}
 
 	interface ITokenizedBuffer extends IModel, ISerializable {
@@ -1694,8 +1717,8 @@ declare module AtomCore {
 declare var atom: AtomCore.IAtom;
 
 declare module "atom" {
-	var BufferedNodeProcess: AtomCore.IBufferedNodeProcessStatic;
-	var BufferedProcess: AtomCore.IBufferedProcessStatic;
+	var BufferedNodeProcess: AtomCore.BufferedNodeProcessStatic;
+	var BufferedProcess: AtomCore.BufferedProcessStatic;
 	// TODO: var GitRepository
 	var Notification: typeof AtomCore.Notification;
 	var TextBuffer: TextBuffer.ITextBufferStatic;
