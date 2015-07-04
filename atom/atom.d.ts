@@ -230,9 +230,9 @@ declare module AtomCore {
 		onDidChangeVisibility(callback: (visibility: boolean) => void): Disposable;
 
 		setScreenPosition(screenPosition: IPointOrArray, options?: { autoscroll?: boolean }): void;
-		getScreenPosition(): TextBuffer.IPoint;
+		getScreenPosition(): IPoint;
 		setBufferPosition(bufferPosition: IPointOrArray, options?: { autoscroll?: boolean }): void;
-		getBufferPosition(): TextBuffer.IPoint;
+		getBufferPosition(): IPoint;
 		getScreenRow(): number;
 		getScreenColumn(): number;
 		getBufferRow(): number;
@@ -271,21 +271,21 @@ declare module AtomCore {
 		moveToBeginningOfNextParagraph(): void;
 		moveToBeginningOfPreviousParagraph(): void;
 
-		getPreviousWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): TextBuffer.IPoint;
-		getNextWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): TextBuffer.IPoint;
+		getPreviousWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): IPoint;
+		getNextWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): IPoint;
 		getBeginningOfCurrentWordBufferPosition(options?: {
 			wordRegex?: RegExp;
 			includeNonWordCharacters?: boolean;
 			allowPrevious: boolean;
-		}): TextBuffer.IPoint;
+		}): IPoint;
 		getEndOfCurrentWordBufferPosition(options?: {
 			wordRegex?: RegExp;
 			includeNonWordCharacters?: boolean;
-		}): TextBuffer.IPoint;
-		getBeginningOfNextWordBufferPosition(options?: { wordRegex: RegExp }): TextBuffer.IPoint;
-		getCurrentWordBufferRange(options?: { wordRegex: RegExp }): TextBuffer.IPoint;
-		getCurrentLineBufferRange(options?: { includeNewline: boolean }): TextBuffer.IPoint;
-		getCurrentParagraphBufferRange(): TextBuffer.IRange;
+		}): IPoint;
+		getBeginningOfNextWordBufferPosition(options?: { wordRegex: RegExp }): IPoint;
+		getCurrentWordBufferRange(options?: { wordRegex: RegExp }): IPoint;
+		getCurrentLineBufferRange(options?: { includeNewline: boolean }): IPoint;
+		getCurrentParagraphBufferRange(): IRange;
 		getCurrentWordPrefix(): string;
 
 		setVisible(visible: boolean): void;
@@ -328,17 +328,17 @@ declare module AtomCore {
 		isEmpty():boolean;
 		isReversed():boolean;
 		isSingleScreenLine():boolean;
-		getScreenRange():TextBuffer.IRange;
+		getScreenRange():IRange;
 		setScreenRange(screenRange:any, options:any):any;
-		getBufferRange():TextBuffer.IRange;
+		getBufferRange():IRange;
 		setBufferRange(bufferRange:any, options:any):any;
 		getBufferRowRange():number[];
 		autoscroll():void;
 		getText():string;
 		clear():boolean;
-		selectWord():TextBuffer.IRange;
+		selectWord():IRange;
 		expandOverWord():any;
-		selectLine(row?:any):TextBuffer.IRange;
+		selectLine(row?:any):IRange;
 		expandOverLine():boolean;
 		selectToScreenPosition(position:any):any;
 		selectToBufferPosition(position:any):any;
@@ -360,10 +360,10 @@ declare module AtomCore {
 		addSelectionBelow():any;
 		getGoalBufferRange():any;
 		addSelectionAbove():any[];
-		insertText(text:string, options?: ISelectionInsertTextOptions): TextBuffer.IRange;
+		insertText(text:string, options?: ISelectionInsertTextOptions): IRange;
 		normalizeIndents(text:string, indentBasis:number):any;
 		indent(_arg?:any):any;
-		indentSelectedRows():TextBuffer.IRange[];
+		indentSelectedRows():IRange[];
 		setIndentationForLine(line:string, indentLevel:number):any;
 		backspace():any;
 		backspaceToBeginningOfWord():any;
@@ -392,10 +392,10 @@ declare module AtomCore {
 
 	// DONE
 	interface ISelectionChangeEvent {
-		oldBufferRange: TextBuffer.IRange;
-		oldScreenRange: TextBuffer.IRange;
-		newBufferRange: TextBuffer.IRange;
-		newScreenRange: TextBuffer.IRange;
+		oldBufferRange: IRange;
+		oldScreenRange: IRange;
+		newBufferRange: IRange;
+		newScreenRange: IRange;
 		/** The selection that triggered the event. */
 		selection: ISelection;
 	}
@@ -416,7 +416,7 @@ declare module AtomCore {
 		(arg: {
 			match: RegExpExecArray,
 			matchText: string,
-			range: TextBuffer.IRange,
+			range: IRange,
 			stop: Function,
 			replace: (replacement: string) => void
 		}): void;
@@ -572,7 +572,7 @@ declare module AtomCore {
 		screenRowForBufferRow(bufferRow: number): number;
 		getMaxScreenLineLength(): number;
 		getLongestScreenRow(): number;
-		bufferRangeForBufferRow(row: number, options?: { includeNewline: boolean }): TextBuffer.IRange;
+		bufferRangeForBufferRow(row: number, options?: { includeNewline: boolean }): IRange;
 		getTextInRange(): string;
 		isBufferRowBlank(): boolean;
 		nextNonBlankBufferRow(): number;
