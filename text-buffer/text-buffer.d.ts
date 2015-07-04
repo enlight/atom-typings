@@ -1,13 +1,15 @@
-// Type definitions for text-buffer
+// Type definitions for text-buffer 6.3.7
 // Project: https://github.com/atom/text-buffer
-// Definitions by: vvakame <https://github.com/vvakame/>
+// Definitions by: vvakame <https://github.com/vvakame/>, Vadim Macagon <https://github.com/enlight/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 /// <reference path="../atom/atom.d.ts" />
-/// <reference path="../emissary/emissary.d.ts" />
 /// <reference path="../q/Q.d.ts" />
+/// <reference path="../serializable/serializable.d.ts" />
 
-declare module TextBuffer {
+declare module AtomTextBuffer {
+
+	type ISerializable = AtomSerializable.ISerializable;
 
 	interface IPointStatic {
 		new (row?:number, column?:number):IPoint;
@@ -184,13 +186,19 @@ declare module TextBuffer {
 	interface ITextBufferStatic {
 		Point: IPointStatic;
 		Range: IRangeStatic;
-		newlineRegex:any;
-
-		new (text:string): ITextBuffer;
-		new (params:any): ITextBuffer;
+		newlineRegex: RegExp;
+		prototype: TextBuffer;
+		
+		new (text: string): TextBuffer;
+		new (params: {
+			/** Initial text of the buffer. */
+			text?: string;
+			/** If `true` the buffer will be loaded asynchronously from disk after intialization. */
+			load?: boolean;
+		}): TextBuffer;
 	}
 
-	interface ITextBuffer extends Emissary.IEmitter, Emissary.ISubscriber {
+	interface TextBuffer extends ISerializable {
 		// Delegator.includeInto(TextBuffer);
 		// Serializable.includeInto(TextBuffer);
 
@@ -246,16 +254,16 @@ declare module TextBuffer {
 		characterIndexForPosition(position:[number,number]):number;
 		positionForCharacterIndex(offset:number):IPoint;
 		getMaxCharacterIndex():number;
-		loadSync():ITextBuffer;
-		load():Q.IPromise<ITextBuffer>;
-		finishLoading():ITextBuffer;
+		loadSync():TextBuffer;
+		load():Q.IPromise<TextBuffer>;
+		finishLoading():TextBuffer;
 		handleTextChange(event:any):any;
 		destroy():any;
 		isAlive():boolean;
 		isDestroyed():boolean;
 		isRetained():boolean;
-		retain():ITextBuffer;
-		release():ITextBuffer;
+		retain():TextBuffer;
+		release():TextBuffer;
 		subscribeToFile():any;
 		hasMultipleEditors():boolean;
 		reload():any;
@@ -304,6 +312,6 @@ declare module TextBuffer {
 }
 
 declare module "text-buffer" {
-	var _: TextBuffer.ITextBufferStatic;
-	export = _;
+	var TextBuffer: AtomTextBuffer.ITextBufferStatic;
+	export = TextBuffer;
 }
