@@ -3,49 +3,80 @@
 // Definitions by: Vadim Macagon <https://github.com/enlight/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-declare module EventKit {
-    interface IDisposable {
-        dispose(): void;
-    }
+declare module AtomEventKit {
+  interface IDisposable {
+    dispose(): void;
+  }
 
-    export class Disposable implements IDisposable {
-        disposed: boolean;
+  /** Static side of the Disposable class. */
+  interface DisposableStatic {
+    prototype: Disposable;
+    new (disposalAction: Function): Disposable;
+  }
 
-        constructor(disposalAction: Function);
-        dispose(): void;
-    }
+  /** Instance side of the Disposable class. */
+  interface Disposable extends IDisposable {
+    disposed: boolean;
 
-    export class CompositeDisposable {
-        disposed: boolean;
+    constructor: DisposableStatic;
+  }
 
-        constructor(...disposables: IDisposable[]);
-        dispose(): void;
-        add(...disposables: IDisposable[]): void;
-        remove(disposable: IDisposable): void;
-        clear(): void;
-    }
+  /** A class that represent a handle to a resource that can be disposed. */
+  var Disposable: DisposableStatic;
 
-    export class Emitter {
-        isDisposed: boolean;
+  /** Static side of the CompositeDisposable class. */
+  interface CompositeDisposableStatic {
+    prototype: CompositeDisposable;
+    new (...disposables: IDisposable[]): CompositeDisposable;
+  }
 
-        constructor();
-        dispose(): void;
-        /**
-         * Registers a handler to be invoked whenever the given event is emitted.
-         * @return An object that will unregister the handler when disposed.
-         */
-        on(eventName: string, handler: (value: any) => void, unshift?: boolean): Disposable;
-        /**
-         * Registers a handler to be invoked *before* all previously registered handlers for
-         * the given event.
-         * @return An object that will unregister the handler when disposed.
-         */
-        preempt(eventName: string, handler: (value: any) => void): Disposable;
-        /** Invokes any registered handlers for the given event. */
-        emit(eventName: string, value: any): void;
-    }
+  /** Instance side of the CompositeDisposable class. */
+  interface CompositeDisposable extends IDisposable {
+    disposed: boolean;
+
+    constructor: CompositeDisposableStatic;
+    add(...disposables: IDisposable[]): void;
+    remove(disposable: IDisposable): void;
+    clear(): void;
+  }
+
+  /**
+   * A class that aggregates multiple [[Disposable]] instances together into a single disposable,
+   * so that they can all be disposed as a group.
+   */
+  var CompositeDisposable: CompositeDisposableStatic;
+
+  /** Static side of the Emitter class. */
+  interface EmitterStatic {
+    prototype: Emitter;
+    new (): Emitter;
+  }
+
+  /** Instance side of the Emitter class. */
+  interface Emitter {
+    isDisposed: boolean;
+
+    constructor: EmitterStatic;
+    dispose(): void;
+    /**
+     * Registers a handler to be invoked whenever the given event is emitted.
+     * @return An object that will unregister the handler when disposed.
+     */
+    on(eventName: string, handler: (value: any) => void, unshift?: boolean): Disposable;
+    /**
+     * Registers a handler to be invoked *before* all previously registered handlers for
+     * the given event.
+     * @return An object that will unregister the handler when disposed.
+     */
+    preempt(eventName: string, handler: (value: any) => void): Disposable;
+    /** Invokes any registered handlers for the given event. */
+    emit(eventName: string, value: any): void;
+  }
+
+  /** A utility class for implementing event-based APIs. */
+  var Emitter: EmitterStatic;
 }
 
 declare module "event-kit" {
-    export = EventKit;
+    export = AtomEventKit;
 }
