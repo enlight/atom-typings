@@ -35,7 +35,7 @@ declare module AtomCore {
 	type IRangeOrArray = AtomTextBuffer.IRangeOrArray;
 	type TextBuffer = AtomTextBuffer.TextBuffer;
 	type Disposable = EventKit.Disposable;
-	type IGrammar = FirstMate.IGrammar;
+	type Grammar = AtomFirstMate.Grammar;
 	type IKeymapManager = AtomKeyMap.KeymapManager;
 	type Directory = PathWatcher.IDirectory;
 	type BrowserWindow = GitHubElectron.BrowserWindow;
@@ -162,8 +162,8 @@ declare module AtomCore {
 		bufferPositionForScreenPosition(screenPosition: IPointOrArray, options: any): IPoint;
 		bufferRangeForScopeAtPosition(selector: string, position: IPointOrArray): IRange;
 		tokenForBufferPosition(bufferPosition: IPointOrArray): Token;
-		getGrammar(): IGrammar;
-		setGrammar(grammar: IGrammar): void;
+		getGrammar(): Grammar;
+		setGrammar(grammar: Grammar): void;
 		reloadGrammar(): void;
 		clipScreenPosition(screenPosition: IPointOrArray, options: any): IPoint;
 		rangeForAllLines(): IRange;
@@ -522,8 +522,8 @@ declare module AtomCore {
 		onDidChangeSelectionRange(callback: (e: ISelectionChangeEvent) => void): Disposable;
 		onDidChangeSoftWrapped(callback: Function): Disposable;
 		onDidChangeEncoding(callback: Function): Disposable;
-		observeGrammar(callback: (grammar: IGrammar) => void): Disposable;
-		onDidChangeGrammar(callback: (grammar: IGrammar) => void): Disposable;
+		observeGrammar(callback: (grammar: Grammar) => void): Disposable;
+		onDidChangeGrammar(callback: (grammar: Grammar) => void): Disposable;
 		onDidChangeModified(callback: Function): Disposable;
 		onDidConflict(callback: Function): Disposable;
 		onWillInsertText(callback: (e: { text: string, cancel: Function }) => void): Disposable;
@@ -811,8 +811,8 @@ declare module AtomCore {
 
 		// Grammars
 
-		getGrammar(): IGrammar;
-		setGrammar(grammar: IGrammar): void;
+		getGrammar(): Grammar;
+		setGrammar(grammar: Grammar): void;
 		reloadGrammar(): void;
 
 		// Syntax Scopes
@@ -1424,7 +1424,7 @@ declare module AtomCore {
 	// DONE
 	/** A registry of grammars used for tokenizing. */
 	interface GrammarRegistry extends IAtomSerializable /*, FirstMate.GrammarRegistry*/ {
-		selectGrammar(filePath: string, fileContents: string): IGrammar;
+		selectGrammar(filePath: string, fileContents: string): Grammar;
 	}
 
 	// DONE
