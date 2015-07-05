@@ -36,7 +36,7 @@ declare module AtomCore {
 	type TextBuffer = AtomTextBuffer.TextBuffer;
 	type Disposable = EventKit.Disposable;
 	type Grammar = AtomFirstMate.Grammar;
-	type IKeymapManager = AtomKeyMap.KeymapManager;
+	type KeymapManager = AtomKeymap.KeymapManager;
 	type Directory = PathWatcher.IDirectory;
 	type BrowserWindow = GitHubElectron.BrowserWindow;
 	type ISerializable = AtomSerializable.ISerializable;
@@ -1654,7 +1654,7 @@ declare module AtomCore {
 		clipboard: Clipboard;
 		contextManu: ContextMenuManager;
 		menu: MenuManager;
-		keymaps: IKeymapManager;
+		keymaps: KeymapManager;
 		tooltips: TooltipManager;
 		notifications: NotificationManager;
 		project: Project;
