@@ -29,17 +29,18 @@ interface Window {
 
 declare module AtomCore {
 
-	type IPoint = AtomTextBuffer.IPoint;
-	type IRange = AtomTextBuffer.IRange;
-	type IPointOrArray = AtomTextBuffer.IPointOrArray;
-	type IRangeOrArray = AtomTextBuffer.IRangeOrArray;
+	type Point = AtomTextBuffer.Point;
+	type Range = AtomTextBuffer.Range;
+	type PointOrArray = AtomTextBuffer.PointOrArray;
+	type RangeOrArray = AtomTextBuffer.RangeOrArray;
 	type TextBuffer = AtomTextBuffer.TextBuffer;
-	type Disposable = EventKit.Disposable;
+	type Disposable = AtomEventKit.Disposable;
 	type Grammar = AtomFirstMate.Grammar;
 	type KeymapManager = AtomKeymap.KeymapManager;
 	type Directory = PathWatcher.IDirectory;
 	type BrowserWindow = GitHubElectron.BrowserWindow;
 	type ISerializable = AtomSerializable.ISerializable;
+	type IScanIteratorFunc = AtomTextBuffer.IScanIteratorFunc;
 
 	interface Model {
 		id: number;
@@ -122,10 +123,10 @@ declare module AtomCore {
 		getVisibleRowRange(): number[];
 		intersectsVisibleRowRange(startRow: number, endRow: number): boolean;
 		selectionIntersectsVisibleRowRange(selection: Selection): boolean;
-		scrollToScreenRange(screenRange: IRange): number;
-		scrollToScreenPosition(screenPosition: IPointOrArray): number;
-		scrollToBufferPosition(bufferPosition: IPointOrArray): number;
-		pixelRectForScreenRange(screenRange: IRange): IPixelRect;
+		scrollToScreenRange(screenRange: Range): number;
+		scrollToScreenPosition(screenPosition: PointOrArray): number;
+		scrollToBufferPosition(bufferPosition: PointOrArray): number;
+		pixelRectForScreenRange(screenRange: Range): IPixelRect;
 		getTabLength(): number;
 		setTabLength(tabLength: number): void;
 		setSoftWrap(softWrap: boolean): boolean;
@@ -149,36 +150,36 @@ declare module AtomCore {
 		screenRowForBufferRow(bufferRow: number): number;
 		lastScreenRowForBufferRow(bufferRow: number): number;
 		bufferRowForScreenRow(screenRow: number): number;
-		screenRangeForBufferRange(bufferRange: IRangeOrArray): IRange;
-		bufferRangeForScreenRange(screenRange: IRangeOrArray): IRange;
-		pixelRangeForScreenRange(screenRange: IRangeOrArray, clip?: boolean): IPixelRange;
-		pixelPositionForScreenPosition(screenPosition: IPointOrArray, clip?: boolean): IPixelPosition;
-		screenPositionForPixelPosition(pixelPosition: IPixelPosition): IPoint;
-		pixelPositionForBufferPosition(bufferPosition: IPointOrArray): IPixelPosition;
+		screenRangeForBufferRange(bufferRange: RangeOrArray): Range;
+		bufferRangeForScreenRange(screenRange: RangeOrArray): Range;
+		pixelRangeForScreenRange(screenRange: RangeOrArray, clip?: boolean): IPixelRange;
+		pixelPositionForScreenPosition(screenPosition: PointOrArray, clip?: boolean): IPixelPosition;
+		screenPositionForPixelPosition(pixelPosition: IPixelPosition): Point;
+		pixelPositionForBufferPosition(bufferPosition: PointOrArray): IPixelPosition;
 		getLineCount(): number;
 		getLastRow(): number;
 		getMaxLineLength(): number;
-		screenPositionForBufferPosition(bufferPosition: IPointOrArray, options: any): IPoint;
-		bufferPositionForScreenPosition(screenPosition: IPointOrArray, options: any): IPoint;
-		bufferRangeForScopeAtPosition(selector: string, position: IPointOrArray): IRange;
-		tokenForBufferPosition(bufferPosition: IPointOrArray): Token;
+		screenPositionForBufferPosition(bufferPosition: PointOrArray, options: any): Point;
+		bufferPositionForScreenPosition(screenPosition: PointOrArray, options: any): Point;
+		bufferRangeForScopeAtPosition(selector: string, position: PointOrArray): Range;
+		tokenForBufferPosition(bufferPosition: PointOrArray): Token;
 		getGrammar(): Grammar;
 		setGrammar(grammar: Grammar): void;
 		reloadGrammar(): void;
-		clipScreenPosition(screenPosition: IPointOrArray, options: any): IPoint;
-		rangeForAllLines(): IRange;
+		clipScreenPosition(screenPosition: PointOrArray, options: any): Point;
+		rangeForAllLines(): Range;
 		/** Retrieves a marker by id. */
 		getMarker(id: number): Marker;
 		getMarkers(): Marker[];
 		getMarkerCount(): number;
 		/** Creates a new marker at the given screen range. */
-		markScreenRange(range: IRangeOrArray, ...args: any[]): Marker;
+		markScreenRange(range: RangeOrArray, ...args: any[]): Marker;
 		/** Creates a new marker at the given buffer range. */
-		markBufferRange(range: IRangeOrArray, options?: any): Marker;
+		markBufferRange(range: RangeOrArray, options?: any): Marker;
 		/** Creates a new marker at the given screen position. */
-		markScreenPosition(screenPosition: IPointOrArray, options?: any): Marker;
+		markScreenPosition(screenPosition: PointOrArray, options?: any): Marker;
 		/** Creates a new marker at the given buffer position. */
-		markBufferPosition(bufferPosition: IPointOrArray, options?: any): Marker;
+		markBufferPosition(bufferPosition: PointOrArray, options?: any): Marker;
 		/** Removes a marker with the given id. */
 		destroyMarker(id: number): void;
 		/** Finds the first marker matching the given parameters. */
@@ -206,10 +207,10 @@ declare module AtomCore {
 
 	// DONE
 	interface ICursorChangeEvent {
-		oldBufferPosition: IPointOrArray;
-		oldScreenPosition: IPointOrArray;
-		newBufferPosition: IPointOrArray;
-		newScreenPosition: IPointOrArray;
+		oldBufferPosition: PointOrArray;
+		oldScreenPosition: PointOrArray;
+		newBufferPosition: PointOrArray;
+		newScreenPosition: PointOrArray;
 		textChanged: boolean;
 		/** The cursor that triggered the event. */
 		cursor: Cursor;
@@ -224,10 +225,10 @@ declare module AtomCore {
 		onDidDestroy(callback: Function): Disposable;
 		onDidChangeVisibility(callback: (visibility: boolean) => void): Disposable;
 
-		setScreenPosition(screenPosition: IPointOrArray, options?: { autoscroll?: boolean }): void;
-		getScreenPosition(): IPoint;
-		setBufferPosition(bufferPosition: IPointOrArray, options?: { autoscroll?: boolean }): void;
-		getBufferPosition(): IPoint;
+		setScreenPosition(screenPosition: PointOrArray, options?: { autoscroll?: boolean }): void;
+		getScreenPosition(): Point;
+		setBufferPosition(bufferPosition: PointOrArray, options?: { autoscroll?: boolean }): void;
+		getBufferPosition(): Point;
 		getScreenRow(): number;
 		getScreenColumn(): number;
 		getBufferRow(): number;
@@ -266,21 +267,21 @@ declare module AtomCore {
 		moveToBeginningOfNextParagraph(): void;
 		moveToBeginningOfPreviousParagraph(): void;
 
-		getPreviousWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): IPoint;
-		getNextWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): IPoint;
+		getPreviousWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): Point;
+		getNextWordBoundaryBufferPosition(options?: { wordRegex: RegExp }): Point;
 		getBeginningOfCurrentWordBufferPosition(options?: {
 			wordRegex?: RegExp;
 			includeNonWordCharacters?: boolean;
 			allowPrevious: boolean;
-		}): IPoint;
+		}): Point;
 		getEndOfCurrentWordBufferPosition(options?: {
 			wordRegex?: RegExp;
 			includeNonWordCharacters?: boolean;
-		}): IPoint;
-		getBeginningOfNextWordBufferPosition(options?: { wordRegex: RegExp }): IPoint;
-		getCurrentWordBufferRange(options?: { wordRegex: RegExp }): IPoint;
-		getCurrentLineBufferRange(options?: { includeNewline: boolean }): IPoint;
-		getCurrentParagraphBufferRange(): IRange;
+		}): Point;
+		getBeginningOfNextWordBufferPosition(options?: { wordRegex: RegExp }): Point;
+		getCurrentWordBufferRange(options?: { wordRegex: RegExp }): Point;
+		getCurrentLineBufferRange(options?: { includeNewline: boolean }): Point;
+		getCurrentParagraphBufferRange(): Range;
 		getCurrentWordPrefix(): string;
 
 		setVisible(visible: boolean): void;
@@ -320,10 +321,10 @@ declare module AtomCore {
 
 		// Managing the selection range
 
-		getScreenRange(): IRange;
-		setScreenRange(screenRange: IRangeOrArray, options?: any): void;
-		getBufferRange(): IRange;
-		setBufferRange(bufferRange: IRangeOrArray, options?: {
+		getScreenRange(): Range;
+		setScreenRange(screenRange: RangeOrArray, options?: any): void;
+		getBufferRange(): Range;
+		setBufferRange(bufferRange: RangeOrArray, options?: {
 			preserveFolds?: boolean;
 			autoscroll?: boolean;
 		}): void;
@@ -335,14 +336,14 @@ declare module AtomCore {
 		isReversed(): boolean;
 		isSingleScreenLine(): boolean;
 		getText(): string;
-		intersectsBufferRange(bufferRange: IRangeOrArray): boolean;
+		intersectsBufferRange(bufferRange: RangeOrArray): boolean;
 		intersectsWith(otherSelection: Selection, exclusive?: boolean): boolean;
 
 		// Modifying the selected range
 
 		clear(options?: { autoscroll: boolean }): void;
-		selectToScreenPosition(position: IPointOrArray): void;
-		selectToBufferPosition(position: IPointOrArray): void;
+		selectToScreenPosition(position: PointOrArray): void;
+		selectToBufferPosition(position: PointOrArray): void;
 		selectRight(columnCount?: number): void;
 		selectLeft(columnCount?: number): void;
 		selectUp(rowCount?: number): void;
@@ -360,14 +361,14 @@ declare module AtomCore {
 		selectToNextWordBoundary(): void;
 		selectToBeginningOfNextParagraph(): void;
 		selectToBeginningOfPreviousParagraph(): void;
-		selectWord(): IRange;
+		selectWord(): Range;
 		expandOverWord(): void;
-		selectLine(row: number): IRange;
+		selectLine(row: number): Range;
 		expandOverLine(): void;
 
 		// Modifying the selected text
 
-		insertText(text: string, options?: ISelectionInsertTextOptions): IRange;
+		insertText(text: string, options?: ISelectionInsertTextOptions): Range;
 		backspace(): void;
 		deleteToPreviousWordBoundary(): void;
 		deleteToNextWordBoundary(): void;
@@ -405,10 +406,10 @@ declare module AtomCore {
 
 	// DONE
 	interface ISelectionChangeEvent {
-		oldBufferRange: IRange;
-		oldScreenRange: IRange;
-		newBufferRange: IRange;
-		newScreenRange: IRange;
+		oldBufferRange: Range;
+		oldScreenRange: Range;
+		newBufferRange: Range;
+		newScreenRange: Range;
 		/** The selection that triggered the event. */
 		selection: Selection;
 	}
@@ -422,17 +423,6 @@ declare module AtomCore {
 		onlyNonEmpty?: boolean;
 		position?: string;
 		gutterName?: string;
-	}
-
-	// DONE
-	interface IScanIteratorFunc {
-		(arg: {
-			match: RegExpExecArray,
-			matchText: string,
-			range: IRange,
-			stop: Function,
-			replace: (replacement: string) => void
-		}): void;
 	}
 
 	// DONE
@@ -589,7 +579,7 @@ declare module AtomCore {
 		// Reading Text
 
 		getText(): string;
-		getTextInBufferRange(range: IRangeOrArray);
+		getTextInBufferRange(range: RangeOrArray);
 		getLineCount(): number;
 		getScreenLineCount(): number;
 		getLastBufferRow(): number;
@@ -603,24 +593,24 @@ declare module AtomCore {
 		screenRowForBufferRow(bufferRow: number): number;
 		getMaxScreenLineLength(): number;
 		getLongestScreenRow(): number;
-		bufferRangeForBufferRow(row: number, options?: { includeNewline: boolean }): IRange;
+		bufferRangeForBufferRow(row: number, options?: { includeNewline: boolean }): Range;
 		getTextInRange(): string;
 		isBufferRowBlank(): boolean;
 		nextNonBlankBufferRow(): number;
 		getEofBufferPosition(): number;
-		getCurrentParagraphBufferRange(): IRange;
+		getCurrentParagraphBufferRange(): Range;
 
 		// Mutating Text
 
 		setText(text: string): void;
-		setTextInBufferRange(range: IRangeOrArray, text: string, options?: {
+		setTextInBufferRange(range: RangeOrArray, text: string, options?: {
 			normalizeLineEndings?: boolean;
 			skip?: string;
-		}): IRange;
+		}): Range;
 		/** Replaces each selection with the given text. */
-		insertText(text: string, options?: ISelectionInsertTextOptions): IRange[] | boolean;
+		insertText(text: string, options?: ISelectionInsertTextOptions): Range[] | boolean;
 		/** Replaces each selection with a newline. */
-		insertNewline(): IRange[] | boolean;
+		insertNewline(): Range[] | boolean;
 		delete(): void;
 		backspace(): void;
 		mutateSelectedText<T>(fn: (selection: Selection, index: number) => T, groupingInterval: number): T[];
@@ -647,9 +637,10 @@ declare module AtomCore {
 
 		// History
 
-		undo();
-		redo();
+		undo(): void;
+		redo(): void;
 		/** Batch multiple operations into a transaction which can be undone/redone in a single step. */
+		transact<T>(groupingInterval: number, fn: () => T): T;
 		transact<T>(fn: () => T): T;
 		abortTransaction(): void;
 		createCheckpoint(): number;
@@ -658,18 +649,18 @@ declare module AtomCore {
 
 		// Coordinates
 
-		screenPositionForBufferPosition(bufferPosition: IPointOrArray, options?: any): IPoint;
-		bufferPositionForScreenPosition(screenPosition: IPointOrArray, options?: any): IPoint;
-		screenRangeForBufferRange(bufferRange: IPointOrArray): IRange;
-		bufferRangeForScreenRange(screenRange: IPointOrArray): IRange;
-		clipBufferPosition(bufferPosition: IPointOrArray): IPoint;
-		clipBufferRange(range: IRangeOrArray): IRange;
-		clipScreenPosition(screenPosition: IPointOrArray, options?: {
+		screenPositionForBufferPosition(bufferPosition: PointOrArray, options?: any): Point;
+		bufferPositionForScreenPosition(screenPosition: PointOrArray, options?: any): Point;
+		screenRangeForBufferRange(bufferRange: PointOrArray): Range;
+		bufferRangeForScreenRange(screenRange: PointOrArray): Range;
+		clipBufferPosition(bufferPosition: PointOrArray): Point;
+		clipBufferRange(range: RangeOrArray): Range;
+		clipScreenPosition(screenPosition: PointOrArray, options?: {
 			wrapBeyondNewlines: boolean,
 			wrapAtSoftNewlines: boolean,
 			screenLine: boolean
-		}): IPoint;
-		clipScreenRange(range: IRange, options?: any): IRange;
+		}): Point;
+		clipScreenRange(range: Range, options?: any): Range;
 
 		// Decorations
 
@@ -684,10 +675,10 @@ declare module AtomCore {
 
 		// Markers
 
-		markBufferRange(range: IRangeOrArray, options?: any): Marker;
-		markScreenRange(range: IRangeOrArray, options?: any): Marker;
-		markBufferPosition(bufferPosition: IPointOrArray, options?: any): Marker;
-		markScreenPosition(screenPosition: IPointOrArray, options?: any): Marker;
+		markBufferRange(range: RangeOrArray, options?: any): Marker;
+		markScreenRange(range: RangeOrArray, options?: any): Marker;
+		markBufferPosition(bufferPosition: PointOrArray, options?: any): Marker;
+		markScreenPosition(screenPosition: PointOrArray, options?: any): Marker;
 		findMarkers(properties: any): Marker[];
 		getMarker(id: number): Marker;
 		getMarkers(): Marker[];
@@ -696,15 +687,15 @@ declare module AtomCore {
 
 		// Cursors
 
-		getCursorBufferPosition(): IPoint;
-		getCursorBufferPositions(): IPoint[];
-		setCursorBufferPosition(position: IPointOrArray, options?: { autoscroll: boolean }): void;
-		getCursorAtScreenPosition(position: IPointOrArray): Cursor;
-		getCursorScreenPosition(): IPoint;
-		getCursorScreenPositions(): IPoint[];
-		setCursorScreenPosition(position: IPointOrArray, options?: { autoscroll: boolean }): void;
-		addCursorAtBufferPosition(bufferPosition: IPointOrArray, options?: { autoscroll: boolean }): Cursor;
-		addCursorAtScreenPosition(screenPosition: IPointOrArray, options?: { autoscroll: boolean }): Cursor;
+		getCursorBufferPosition(): Point;
+		getCursorBufferPositions(): Point[];
+		setCursorBufferPosition(position: PointOrArray, options?: { autoscroll: boolean }): void;
+		getCursorAtScreenPosition(position: PointOrArray): Cursor;
+		getCursorScreenPosition(): Point;
+		getCursorScreenPositions(): Point[];
+		setCursorScreenPosition(position: PointOrArray, options?: { autoscroll: boolean }): void;
+		addCursorAtBufferPosition(bufferPosition: PointOrArray, options?: { autoscroll: boolean }): Cursor;
+		addCursorAtScreenPosition(screenPosition: PointOrArray, options?: { autoscroll: boolean }): Cursor;
 		hasMultipleCursors(): boolean;
 		moveUp(lineCount?: number): void;
 		moveDown(lineCount?: number): void;
@@ -737,18 +728,18 @@ declare module AtomCore {
 		// Selections
 
 		getSelectedText(): string;
-		getSelectedBufferRange(): IRange;
-		getSelectedBufferRanges(): IRange[];
-		setSelectedBufferRange(bufferRange: IRangeOrArray, options?: { reversed: boolean }): void;
-		setSelectedBufferRanges(bufferRanges: IRangeOrArray[], options?: { reversed: boolean }): void;
-		getSelectedScreenRange(): IRange;
-		getSelectedScreenRanges(): IRange[];
-		setSelectedScreenRange(screenRange: IRangeOrArray, options?: { reversed: boolean }): void;
-		setSelectedScreenRanges(screenRanges: IRangeOrArray[], options?: { reversed: boolean }): void;
-		addSelectionForBufferRange(bufferRange: IRangeOrArray, options?: { reversed: boolean }): Selection;
-		addSelectionForScreenRange(screenRange: IRangeOrArray, options?: { reversed: boolean }): Selection;
-		selectToBufferPosition(position: IPointOrArray): void;
-		selectToScreenPosition(position: IPointOrArray): void;
+		getSelectedBufferRange(): Range;
+		getSelectedBufferRanges(): Range[];
+		setSelectedBufferRange(bufferRange: RangeOrArray, options?: { reversed: boolean }): void;
+		setSelectedBufferRanges(bufferRanges: RangeOrArray[], options?: { reversed: boolean }): void;
+		getSelectedScreenRange(): Range;
+		getSelectedScreenRanges(): Range[];
+		setSelectedScreenRange(screenRange: RangeOrArray, options?: { reversed: boolean }): void;
+		setSelectedScreenRanges(screenRanges: RangeOrArray[], options?: { reversed: boolean }): void;
+		addSelectionForBufferRange(bufferRange: RangeOrArray, options?: { reversed: boolean }): Selection;
+		addSelectionForScreenRange(screenRange: RangeOrArray, options?: { reversed: boolean }): Selection;
+		selectToBufferPosition(position: PointOrArray): void;
+		selectToScreenPosition(position: PointOrArray): void;
 		selectUp(rowCount?: number): void;
 		selectDown(rowCount?: number): void;
 		selectLeft(columnCount?: number): void;
@@ -768,17 +759,17 @@ declare module AtomCore {
 		selectToBeginningOfNextWord(): void;
 		selectToBeginningOfNextParagraph(): void;
 		selectToBeginningOfPreviousParagraph(): void;
-		selectMarker(marker: Marker): IRange;
+		selectMarker(marker: Marker): Range;
 		getLastSelection(): Selection;
 		getSelections(): Selection[];
 		getSelectionsOrderedByBufferPosition(): Selection[];
-		selectionIntersectsBufferRange(bufferRange: IRangeOrArray): boolean;
+		selectionIntersectsBufferRange(bufferRange: RangeOrArray): boolean;
 
 		// Search and Replace
 
 		scan(regex: RegExp, iterator: IScanIteratorFunc): void;
-		scanInBufferRange(regex: RegExp, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
-		backwardsScanInBufferRange(regex: RegExp, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
+		scanInBufferRange(regex: RegExp, range: RangeOrArray, iterator: IScanIteratorFunc): void;
+		backwardsScanInBufferRange(regex: RegExp, range: RangeOrArray, iterator: IScanIteratorFunc): void;
 
 		// Tab Behavior
 
@@ -789,7 +780,7 @@ declare module AtomCore {
 		setTabLength(): void;
 		usesSoftTabs(): boolean;
 		getTabText(): string;
-		normalizeTabsInBufferRange(bufferRange: IRangeOrArray): void;
+		normalizeTabsInBufferRange(bufferRange: RangeOrArray): void;
 
 		// Soft Wrap Behavior
 
@@ -801,7 +792,7 @@ declare module AtomCore {
 		// Indentation
 
 		indentationForBufferRow(bufferRow: number): number;
-		setIndentationForBufferRow(bufferRow: number, newLevel: number, options?: { preserveLeadingWhitespace: boolean }): IRange;
+		setIndentationForBufferRow(bufferRow: number, newLevel: number, options?: { preserveLeadingWhitespace: boolean }): Range;
 		indentSelectedRows(): void;
 		outdentSelectedRows(): void;
 		indentLevelForLine(line: string): number;
@@ -818,11 +809,11 @@ declare module AtomCore {
 		// Syntax Scopes
 
 		getRootScopeDescriptor(): ScopeDescriptor;
-		scopeDescriptorForBufferPosition(bufferPosition: IPointOrArray): ScopeDescriptor;
-		bufferRangeForScopeAtCursor(scopeSelector: string): IRange;
+		scopeDescriptorForBufferPosition(bufferPosition: PointOrArray): ScopeDescriptor;
+		bufferRangeForScopeAtCursor(scopeSelector: string): Range;
 		isBufferRowCommented(bufferRow: number): boolean;
 		logCursorScope(): void;
-		tokenForBufferPosition(bufferPosition: IPointOrArray): Token;
+		tokenForBufferPosition(bufferPosition: PointOrArray): Token;
 
 		// Clipboard Operations
 
@@ -848,8 +839,8 @@ declare module AtomCore {
 		isFoldedAtScreenRow(screenRow: number): boolean;
 		createFold(startRow: number, endRow: number): Fold;
 		destroyFoldWithId(id: number): void;
-		destroyFoldsIntersectingBufferRange(bufferRange: IRangeOrArray): void;
-		destroyFoldsContainingBufferRange(bufferRange: IRangeOrArray): void;
+		destroyFoldsIntersectingBufferRange(bufferRange: RangeOrArray): void;
+		destroyFoldsContainingBufferRange(bufferRange: RangeOrArray): void;
 		largestFoldContainingBufferRow(bufferRow: number): Fold;
 		largestFoldStartingAtScreenRow(screenRow: number): Fold;
 		outermostFoldsInBufferRowRange(startRow: number, endRow: number): Fold[];
@@ -857,11 +848,11 @@ declare module AtomCore {
 		// Scrolling
 
 		scrollToCursorPosition(options?: { center: boolean }): void;
-		scrollToBufferPosition(bufferPosition: IPointOrArray, options: { center: boolean }): void;
-		scrollToScreenPosition(screenPosition: IPointOrArray, options: { center: boolean }): void;
+		scrollToBufferPosition(bufferPosition: PointOrArray, options: { center: boolean }): void;
+		scrollToScreenPosition(screenPosition: PointOrArray, options: { center: boolean }): void;
 		scrollToTop(): number;
 		scrollToBottom(): number;
-		scrollToScreenRange(screenRange: IRangeOrArray, options?: {
+		scrollToScreenRange(screenRange: RangeOrArray, options?: {
 			center: boolean;
 			reversed: boolean;
 		}): number;
@@ -1033,7 +1024,7 @@ declare module AtomCore {
 			 * The range the match was found in, either a range object or an array of the form:
 			 * `[[lineNumber, matchStartIndex], [lineNumber, matchEndIndex]]`
 			 */
-			range: IRangeOrArray;
+			range: RangeOrArray;
 		}>;
 	}
 
@@ -1509,7 +1500,7 @@ declare module AtomCore {
 
 		isInsideLargerFold(): boolean;
 		destroy();
-		getBufferRange(options?: { includeNewline: boolean }): IRange;
+		getBufferRange(options?: { includeNewline: boolean }): Range;
 		/** @return Array with two elements: `[startRow, endRow]`. */
 		getBufferRowRange(): Array<number>;
 		getStartRow(): number;
@@ -1521,32 +1512,31 @@ declare module AtomCore {
 
 	// DONE
 	interface IMarkerChangeEvent {
-		oldHeadPosition: IPoint;
-		newHeadPosition: IPoint;
-		oldTailPosition: IPoint;
-		newTailPosition: IPoint;
-		wasValid: boolean;
-		isValid: boolean;
-		hadTail: boolean;
-		hasTail: boolean;
-		oldProperties: any;
-		newProperties: any;
+		oldHeadScreenPosition: Point;
+		newHeadScreenPosition: Point;
+		oldHeadBufferPosition: Point;
+		newHeadBufferPosition: Point;
+		oldTailScreenPosition: Point;
+		newTailScreenPosition: Point;
+		oldTailBufferPosition: Point;
+		newTailBufferPosition: Point;
 		/**
 		* Indicates whether the change was caused by a textual change to the buffer, or whether
 		* the marker was minpulated directly via its public API.
 		*/
 		textChanged: boolean;
+		isValid: boolean;
 	}
 
 	// previously known as IDisplayBufferMarker
 	/** A buffer annotation that remains logically stationary as the buffer changes. */
 	interface Marker {
 		id: number;
-		bufferMarker: AtomTextBuffer.IMarker;
+		bufferMarker: AtomTextBuffer.Marker;
 		displayBuffer: DisplayBuffer;
 
 		/** New instances should be constructed indirectly via the TextEditor class. */
-		constructor(args: { bufferMarker: AtomTextBuffer.IMarker; displayBuffer: DisplayBuffer });
+		constructor(args: { bufferMarker: AtomTextBuffer.Marker; displayBuffer: DisplayBuffer });
 		/** Destroys the marker after which the marker cannot be restored by undo/redo operations. */
 		destroy(): void;
 		/** Creates and returns a new marker with the same properties as this one. */
@@ -1572,22 +1562,22 @@ declare module AtomCore {
 		/** Compares this marker to another based on the range (and only the range). */
 		compare(other: Marker): boolean;
 
-		getBufferRange(): IRange;
-		setBufferRange(bufferRange: IRangeOrArray, properties?: any): void;
-		getScreenRange(): IRange;
-		setScreenRange(screenRange: IRangeOrArray, properties?: any): void;
-		getStartBufferPosition(): IPoint;
-		getStartScreenPosition(): IPoint;
-		getEndBufferPosition(): IPoint;
-		getEndScreenPosition(): IPoint;
-		getHeadBufferPosition(): IPoint;
-		setHeadBufferPosition(bufferPosition: IPointOrArray, properties?: any): void;
-		getHeadScreenPosition(): IPoint;
-		setHeadScreenPosition(screenPosition: IPointOrArray, properties?: any): void;
-		getTailBufferPosition(): IPoint;
-		setTailBufferPosition(bufferPosition: IPointOrArray): void;
-		getTailScreenPosition(): IPoint;
-		setTailScreenPosition(screenPosition: IPointOrArray, options?: any): void;
+		getBufferRange(): Range;
+		setBufferRange(bufferRange: RangeOrArray, properties?: any): void;
+		getScreenRange(): Range;
+		setScreenRange(screenRange: RangeOrArray, properties?: any): void;
+		getStartBufferPosition(): Point;
+		getStartScreenPosition(): Point;
+		getEndBufferPosition(): Point;
+		getEndScreenPosition(): Point;
+		getHeadBufferPosition(): Point;
+		setHeadBufferPosition(bufferPosition: PointOrArray, properties?: any): void;
+		getHeadScreenPosition(): Point;
+		setHeadScreenPosition(screenPosition: PointOrArray, properties?: any): void;
+		getTailBufferPosition(): Point;
+		setTailBufferPosition(bufferPosition: PointOrArray): void;
+		getTailScreenPosition(): Point;
+		setTailScreenPosition(screenPosition: PointOrArray, options?: any): void;
 		hasTail(): boolean;
 		plantTail(): boolean;
 		clearTail(properties?: any): boolean;
@@ -1762,14 +1752,17 @@ declare module "atom" {
 	var BufferedProcess: AtomCore.BufferedProcessStatic;
 	// TODO: var GitRepository
 	var Notification: AtomCore.NotificationStatic;
-	var TextBuffer: AtomTextBuffer.ITextBufferStatic;
-	var Point: AtomTextBuffer.IPointStatic;
-	var Range: AtomTextBuffer.IRangeStatic;
+	var TextBuffer: AtomTextBuffer.TextBufferStatic;
+	var Point: AtomTextBuffer.PointStatic;
+	var Range: AtomTextBuffer.RangeStatic;
 	var File: PathWatcher.IFileStatic;
 	var Directory: PathWatcher.IDirectoryStatic;
-	var Emitter: typeof EventKit.Emitter;
-	var Disposable: typeof EventKit.Disposable;
-	var CompositeDisposable: typeof EventKit.CompositeDisposable;
+	var Emitter: AtomEventKit.EmitterStatic;
+	var Disposable: AtomEventKit.DisposableStatic;
+	type CompositeDisposable = AtomEventKit.CompositeDisposable;
+	var CompositeDisposable: AtomEventKit.CompositeDisposableStatic;
+	// More concise than the 6 lines above but requires TypeScript 1.5:
+	//export { Emitter, Disposable, CompositeDisposable } from 'event-kit';
 	// NOTE: The following are only available when NOT running as a child Node process.
 	var Task: AtomCore.TaskStatic;
 	var TextEditor: AtomCore.TextEditorStatic;
