@@ -10,163 +10,207 @@
 declare module AtomTextBuffer {
 
 	type ISerializable = AtomSerializable.ISerializable;
+	/** A point, point-compatible array, or point-compatible object. */
+	type IPointOrArray = IPoint | Array<number> | { row: number; column: number };
+	/** A range or range-compatible array. */
+	type IRangeOrArray = IRange | Array<IPointOrArray>;
 
+	/** Static side of Point class. */
 	interface IPointStatic {
-		new (row?:number, column?:number):IPoint;
+		/**
+		 * Converts any point-compatible object to a [[Point]].
+		 *
+		 * @param copy Indicates whether to force the copying of the given object if it's already
+		 *             a [[Point]].
+		 */
+		fromObject(object: IPointOrArray, copy?: boolean): IPoint;
+		/** @return The [[Point]] that is earlier in the buffer. */
+		min(point1: IPointOrArray, point2: IPointOrArray): IPoint;
+		max(point1: IPointOrArray, point2: IPointOrArray): IPoint;
 
-		fromObject(point:IPoint, copy?:boolean):IPoint;
-		fromObject(object:number[]):IPoint;
-		fromObject(object:{row:number; column:number;}):IPoint;
+		ZERO: IPoint;
+		INFINITY: IPoint;
 
-		min(point1:IPoint, point2:IPoint):IPoint;
-		min(point1:number[], point2:IPoint):IPoint;
-		min(point1:{row:number; column:number;}, point2:IPoint):IPoint;
-
-		min(point1:IPoint, point2:number[]):IPoint;
-		min(point1:number[], point2:number[]):IPoint;
-		min(point1:{row:number; column:number;}, point2:number[]):IPoint;
-
-		min(point1:IPoint, point2:{row:number; column:number;}):IPoint;
-		min(point1:number[], point2:{row:number; column:number;}):IPoint;
-		min(point1:{row:number; column:number;}, point2:{row:number; column:number;}):IPoint;
+		prototype: IPoint;
+		new (row?: number, column?: number): IPoint;
 	}
 
+	/** Instance side of Point class. */
 	interface IPoint {
 		constructor: IPointStatic;
+		/* A zero-indexed row. */
+		row: number;
+		/* A zero-indexed column. */
+		column: number;
 
-		row:number;
-		column:number;
+		/** @return A new [[Point]] with the same row and column. */
+		copy(): IPoint;
+		/** @return A new [[Point]] with the row and column negated. */
+		negate(): IPoint;
 
-		copy():IPoint;
-		freeze():IPoint;
+		// Operations
 
-		translate(delta:IPoint):IPoint;
-		translate(delta:number[]):IPoint;
-		translate(delta:{row:number; column:number;}):IPoint;
+		/**
+		 * Makes this point immutable.
+		 *
+		 * @return `this`
+		 */
+		freeze(): IPoint;
+		/**
+		 * Builds a new point by adding the rows and columns of the given point to this one.
+		 *
+		 * @param other A point whose row and column will be added to this point.
+		 * @return A new point.
+		 */
+		translate(other: IPointOrArray): IPoint;
+		/** Builds a new point by traversing the rows and columns of the given point. */
+		traverse(other: IPointOrArray): IPoint;
 
-		add(other:IPoint):IPoint;
-		add(other:number[]):IPoint;
-		add(other:{row:number; column:number;}):IPoint;
+		splitAt(column: number): IPoint[];
 
-		splitAt(column:number):IPoint[];
-		compare(other:IPoint):number;
-		isEqual(other:IPoint):boolean;
-		isLessThan(other:IPoint):boolean;
-		isLessThanOrEqual(other:IPoint):boolean;
-		isGreaterThan(other:IPoint):boolean;
-		isGreaterThanOrEqual(other:IPoint):boolean;
-		toArray():number[];
-		serialize():number[];
+		// Comparison
+
+		/**
+		 * @return `-1` if this point precedes `other`,
+		 *         `0` if this point is equivalent to `other`,
+		 *         `1` if this point follows `other`.
+		 */
+		compare(other: IPointOrArray): number;
+		isEqual(other: IPointOrArray): boolean;
+		isLessThan(other: IPointOrArray): boolean;
+		isLessThanOrEqual(other: IPointOrArray): boolean;
+		isGreaterThan(other: IPointOrArray): boolean;
+		isGreaterThanOrEqual(other: IPointOrArray): boolean;
+
+		// Conversion
+
+		/** @return An array of this point's row and column. */
+		toArray(): number[];
+		/** @return An array of this point's row and column. */
+		serialize(): number[];
 	}
 
+	/** Represents a point in a buffer in row/column coordinates. */
+	var Point: IPointStatic;
+
+	/** Static side of Range class. */
 	interface IRangeStatic {
-		deserialize(array:IPoint[]):IRange;
+		/**
+		 * Converts any range-compatible object to a [[Range]].
+		 *
+		 * @param copy Indicates whether to force the copying of the given object if it's already
+		 *             a [[Range]].
+		 */
+		fromObject(object: IRangeOrArray, copy?: boolean): IRange;
+		/**
+		 * Creates a range based on an optional starting point and the given text.
+		 *
+		 * @param startPoint Start of the new range, defaults to `(0, 0)`.
+		 * @param text String that should be used to determine the end of the new range.
+		 *             The range will have as many rows as the text has lines, and an end column based
+		 *             on the length of the last line.
+		 */
+		fromText(startPoint: IPointOrArray, text: string): IRange;
+		fromText(text: string):IRange;
+		/**
+		 * Creates a range that starts at the given point and ends at the start point plus the
+		 * given row and column deltas.
+		 */
+		fromPointWithDelta(startPoint: IPointOrArray, rowDelta: number, columnDelta: number): IRange;
+		/**
+		 * Constructs a new range from a previously serialized one.
+		 *
+		 * @param array Result of [[Range.serialize]].
+		 * @return A new range.
+		 */
+		deserialize(array: Array<number[]>): IRange;
 
-		fromObject(object:IPoint[]):IRange;
-
-		fromObject(object:IRange, copy?:boolean):IRange;
-
-		fromObject(object:{start: IPoint; end: IPoint}):IRange;
-		fromObject(object:{start: number[]; end: IPoint}):IRange;
-		fromObject(object:{start: {row:number; column:number;}; end: IPoint}):IRange;
-
-		fromObject(object:{start: IPoint; end: number[]}):IRange;
-		fromObject(object:{start: number[]; end: number[]}):IRange;
-		fromObject(object:{start: {row:number; column:number;}; end: number[]}):IRange;
-
-		fromObject(object:{start: IPoint; end: {row:number; column:number;}}):IRange;
-		fromObject(object:{start: number[]; end: {row:number; column:number;}}):IRange;
-		fromObject(object:{start: {row:number; column:number;}; end: {row:number; column:number;}}):IRange;
-
-		fromText(point:IPoint, text:string):IRange;
-		fromText(point:number[], text:string):IRange;
-		fromText(point:{row:number; column:number;}, text:string):IRange;
-		fromText(text:string):IRange;
-
-		fromPointWithDelta(startPoint:IPoint, rowDelta:number, columnDelta:number):IRange;
-		fromPointWithDelta(startPoint:number[], rowDelta:number, columnDelta:number):IRange;
-		fromPointWithDelta(startPoint:{row:number; column:number;}, rowDelta:number, columnDelta:number):IRange;
-
-		new(point1:IPoint, point2:IPoint):IRange;
-		new(point1:number[], point2:IPoint):IRange;
-		new(point1:{row:number; column:number;}, point2:IPoint):IRange;
-
-		new(point1:IPoint, point2:number[]):IRange;
-		new(point1:number[], point2:number[]):IRange;
-		new(point1:{row:number; column:number;}, point2:number[]):IRange;
-
-		new(point1:IPoint, point2:{row:number; column:number;}):IRange;
-		new(point1:number[], point2:{row:number; column:number;}):IRange;
-		new(point1:{row:number; column:number;}, point2:{row:number; column:number;}):IRange;
+		prototype: IRange;
+		new (pointA: IPointOrArray, pointB: IPointOrArray): IRange;
 	}
 
+	/** Instance side of Range class. */
 	interface IRange {
-		constructor:IRangeStatic;
+		constructor: IRangeStatic;
 
 		start: IPoint;
 		end: IPoint;
 
-		serialize():number[][];
-		copy():IRange;
-		freeze():IRange;
-		isEqual(other:IRange):boolean;
-		isEqual(other:IPoint[]):boolean;
+		/** @return A new [[Range]] with the same start and end positions. */
+		copy(): IRange;
+		/** @return A new range with the start and end positions negated. */
+		negate(): IRange;
+		/** @return Serialized object that can be passed to [[Point.deserialize]]. */
+		serialize(): Array<number[]>;
 
-		compare(object:IPoint[]):number;
+		// Range Details
 
-		compare(object:{start: IPoint; end: IPoint}):number;
-		compare(object:{start: number[]; end: IPoint}):number;
-		compare(object:{start: {row:number; column:number;}; end: IPoint}):number;
+		isEmpty(): boolean;
+		isSingleLine(): boolean;
+		getRowCount(): number;
+		getRows(): number[];
 
-		compare(object:{start: IPoint; end: number[]}):number;
-		compare(object:{start: number[]; end: number[]}):number;
-		compare(object:{start: {row:number; column:number;}; end: number[]}):number;
+		// Operations
 
-		compare(object:{start: IPoint; end: {row:number; column:number;}}):number;
-		compare(object:{start: number[]; end: {row:number; column:number;}}):number;
-		compare(object:{start: {row:number; column:number;}; end: {row:number; column:number;}}):number;
+		/**
+		 * Makes this range immutable.
+		 *
+		 * @return `this`
+		 */
+		freeze(): IRange;
+		/** @return A new range that contains this range and the `otherRange`. */
+		union(otherRange: IRange): IRange;
+		/**
+		 * Creates a new range by translating the this range by the given delta(s).
+		 *
+		 * @param startDelta A point by which the start of this range should be translated.
+		 * @param endDelta A point by which the end of this range should be translated,
+		 *                 by default this will be the same as `startDelta`.
+		 */
+		translate(startDelta: IPointOrArray, endDelta?: IPointOrArray): IRange;
+		/** @see [[Point.traverse]] on differences between traversal and translation. */
+		traverse(delta: IPointOrArray): IRange;
 
-		isSingleLine():boolean;
-		coversSameRows(other:IRange):boolean;
+		// Comparison
 
-		add(object:IPoint[]):IRange;
+		/**
+		 * @return `-1` if this range starts before `other` or contains it,
+		 *         `0` if this range is equivalent to `other`,
+		 *         `1` if this range starts after `other` or is contained by it.
+		 */
+		compare(other: IRangeOrArray): number;
+		isEqual(other: IRangeOrArray): boolean;
+		/** @return `true` if this range starts and ends on the same rows as the `other` range. */
+		coversSameRows(other: IRange): boolean;
+		/**
+		 * Checks if this range interesects with another.
+		 *
+		 * @param exclusive Set to `true` to exclude endpoints when testing for intersection,
+		 *                  defaults to `false`.
+		 */
+		intersectsWith(otherRange: IRange, exclusive?: boolean): boolean;
+		/**
+		 * Checks if this range contains another.
+		 *
+		 * @param exclusive Set to `true` to exclude range endpoints from the containment test,
+		 *                  defaults to `false`.
+		 * @return `true` if this range contains the given range.
+		 */
+		containsRange(otherRange: IRangeOrArray, exclusive?: boolean): boolean;
+		/** @return `true` if this range contains the given point. */
+		containsPoint(point: IPointOrArray, exclusive?: boolean): boolean;
+		/** @return `true` if this range intersects the given row. */
+		intersectsRow(row: number): boolean;
+		/** @return `true` if this range intersects the given row range. */
+		intersectsRowRange(startRow: number, endRow: number): boolean;
 
-		add(object:{start: IPoint; end: IPoint}):IRange;
-		add(object:{start: number[]; end: IPoint}):IRange;
-		add(object:{start: {row:number; column:number;}; end: IPoint}):IRange;
-
-		add(object:{start: IPoint; end: number[]}):IRange;
-		add(object:{start: number[]; end: number[]}):IRange;
-		add(object:{start: {row:number; column:number;}; end: number[]}):IRange;
-
-		add(object:{start: IPoint; end: {row:number; column:number;}}):IRange;
-		add(object:{start: number[]; end: {row:number; column:number;}}):IRange;
-		add(object:{start: {row:number; column:number;}; end: {row:number; column:number;}}):IRange;
-
-		translate(startPoint:IPoint, endPoint:IPoint):IRange;
-		translate(startPoint:IPoint):IRange;
-
-		intersectsWith(otherRange:IRange):boolean;
-		containsRange(otherRange:IRange, exclusive:boolean):boolean;
-
-		containsPoint(point:IPoint, exclusive:boolean):boolean;
-		containsPoint(point:number[], exclusive:boolean):boolean;
-		containsPoint(point:{row:number; column:number;}, exclusive:boolean):boolean;
-
-		intersectsRow(row:number):boolean;
-		intersectsRowRange(startRow:number, endRow:number):boolean;
-		union(otherRange:IRange):IRange;
-		isEmpty():boolean;
-		toDelta():IPoint;
-		getRowCount():number;
-		getRows():number[];
+		toDelta(): IPoint;
 	}
 
-	/** A point-compatible array. */
-	type IPointOrArray = IPoint | Array<number>;
-	/** A range-compatible array. */
-	type IRangeOrArray = IRange | Array<IPointOrArray>;
+	/** Represents a region in a buffer in row/column coordinates. */
+	var Range: IRangeStatic;
 
+	/** Manages undo/redo for [[TextBuffer]]. */
 	interface IHistory {
 		// TBD
 	}
@@ -188,7 +232,7 @@ declare module AtomTextBuffer {
 		Range: IRangeStatic;
 		newlineRegex: RegExp;
 		prototype: TextBuffer;
-		
+
 		new (text: string): TextBuffer;
 		new (params: {
 			/** Initial text of the buffer. */
