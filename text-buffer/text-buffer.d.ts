@@ -3,8 +3,6 @@
 // Definitions by: vvakame <https://github.com/vvakame/>, Vadim Macagon <https://github.com/enlight/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path="../atom/atom.d.ts" />
-/// <reference path="../q/Q.d.ts" />
 /// <reference path="../serializable/serializable.d.ts" />
 /// <reference path="../event-kit/event-kit.d.ts"/>
 
@@ -212,21 +210,53 @@ declare module AtomTextBuffer {
 	/** Represents a region in a buffer in row/column coordinates. */
 	var Range: IRangeStatic;
 
-	/** Manages undo/redo for [[TextBuffer]]. */
-	interface IHistory {
-		// TBD
+	interface IMarkerChangeEvent {
+		oldHeadPosition: IPoint;
+		newHeadPosition: IPoint;
+		oldTailPosition: IPoint;
+		newTailPosition: IPoint;
+		wasValid: boolean;
+		isValid: boolean;
+		hadTail: boolean;
+		hasTail: boolean;
+		oldProperties: any;
+		newProperties: any;
+		/**
+		* Indicates whether the change was caused by a textual change to the buffer, or whether
+		* the marker was minpulated directly via its public API.
+		*/
+		textChanged: boolean;
 	}
 
-	interface IMarkerManager {
-		// TBD
-	}
-
+	/** A buffer annotation that remains logically stationary even as the buffer contents change. */
 	interface Marker {
-		// TBD
-	}
+		/** Invokes the given callback when the marker is destroyed. */
+		onDidDestroy(callback: Function): Disposable;
+		/** Invokes the given callback when the state of the marker changes. */
+		onDidChange(callback: (event: IMarkerChangeEvent) => void): Disposable;
 
-	interface IBufferPatch {
-		// TBD
+		/** @return The current range of the marker. Note that the object returned is immutable. */
+		getRange(): IRange;
+		setRange(range: IRangeOrArray, properties?: { reversed?: boolean }): boolean;
+		getHeadPosition(): IPoint;
+		setHeadPosition(position: IPointOrArray, properties?: any): boolean;
+		getTailPosition(): IPoint;
+		setTailPosition(position: IPointOrArray, properties?: any): boolean;
+		getStartPosition(): IPoint;
+		getEndPosition(): IPoint;
+		clearTail(properties?: any): boolean;
+		plantTail(properties?: any): boolean;
+		isReversed(): boolean;
+		hasTail(): boolean;
+		isValid(): boolean;
+		isDestroyed(): boolean;
+		isEqual(other: Marker): boolean;
+		getInvalidationStrategy(): string;
+		getProperties(): any;
+		setProperties(properties: any);
+		copy(options?: any): Marker;
+		destroy(): void;
+		compare(other: Marker): number;
 	}
 
 	interface ITextBufferStatic {
