@@ -6,9 +6,11 @@
 /// <reference path="../atom/atom.d.ts" />
 /// <reference path="../q/Q.d.ts" />
 /// <reference path="../serializable/serializable.d.ts" />
+/// <reference path="../event-kit/event-kit.d.ts"/>
 
 declare module AtomTextBuffer {
 
+	type Disposable = AtomEventKit.Disposable;
 	type ISerializable = AtomSerializable.ISerializable;
 	/** A point, point-compatible array, or point-compatible object. */
 	type IPointOrArray = IPoint | Array<number> | { row: number; column: number };
@@ -219,7 +221,7 @@ declare module AtomTextBuffer {
 		// TBD
 	}
 
-	interface IMarker {
+	interface Marker {
 		// TBD
 	}
 
@@ -228,6 +230,7 @@ declare module AtomTextBuffer {
 	}
 
 	interface ITextBufferStatic {
+		version: number;
 		Point: IPointStatic;
 		Range: IRangeStatic;
 		newlineRegex: RegExp;
@@ -242,120 +245,331 @@ declare module AtomTextBuffer {
 		}): TextBuffer;
 	}
 
+	interface IBufferChangeEvent {
+		/** Range of `oldText`. */
+		oldRange: IRange;
+		/** Range of `newText`. */
+		newRange: IRange;
+		/** Text that will be or was replaced. */
+		oldText: string;
+		/** Text that will be or was inserted. */
+		newText: string;
+	}
+
+	interface IBufferSaveEvent {
+		/** The path to which the buffer was saved. */
+		path: string;
+	}
+
+	interface IThrowErrorEvent {
+		error: Error;
+		/**
+		 * Call this to indicate the error has been handled.
+		 * If this function is called the error will not be thrown.
+		 */
+		handle: Function;
+	}
+
+	interface ITextMutationOptions {
+		normalizeLineEndings?: boolean;
+		/** Set to `'skip'` to bypass the undo/redo system. */
+		undo?: string;
+	}
+
+	interface IMarkerProperties {
+		/** If `true` the marker will be created with a reversed orientation, defaults to `false`. */
+		reversed?: boolean;
+		/** If `true` the marker will be serialized when serializing the buffer, defaults to `true`. */
+		persistent?: boolean;
+		/**
+		 * Determines the rules by which changes to the buffer invalidate the marker,
+		 * defaults to `'overlap'`.
+		 */
+		invalidate?: string;
+	}
+
+	interface IMarkerSearchOptions {
+		/** Only include markers that start at the given point. */
+		startPosition?: IPointOrArray;
+		/** Only include markers that end at the given point. */
+		endPosition?: IPointOrArray;
+		/** Only include markers that contain the given point (inclusive). */
+		containsPoint?: IPointOrArray;
+		/** Only include markers that contain the given range (inclusive). */
+		containsRange?: IRangeOrArray;
+		/** Only include markers that start at the given row. */
+		startRow?: number;
+		/** Only include markers that end at the given row. */
+		endRow?: number;
+		/** Only include markers that intersect the given row. */
+		intersectsRow?: number;
+		/** Only include markers that are contained in the given range. */
+		containedInRange?: IRangeOrArray;
+	}
+
+	interface IScanIteratorFunc {
+		(arg: {
+			match: RegExpExecArray,
+			matchText: string,
+			range: IRange,
+			stop: Function,
+			replace: (replacement: string) => void
+		}): void;
+	}
+
 	interface TextBuffer extends ISerializable {
-		// Delegator.includeInto(TextBuffer);
-		// Serializable.includeInto(TextBuffer);
+		constructor: ITextBufferStatic;
 
-		cachedText:string;
-		stoppedChangingDelay:number;
-		stoppedChangingTimeout:any;
-		cachedDiskContents:string;
-		conflict:boolean;
-		file:any; // pathwatcher.IFile
-		refcount:number;
+		// Event Subscription
 
-		lines:string[];
-		lineEndings:string[];
-		offsetIndex:any; // span-skip-list.SpanSkipList
-		history:IHistory;
-		markers:IMarkerManager;
-		loaded:boolean;
-		digestWhenLastPersisted:string;
-		modifiedWhenLastPersisted:boolean;
-		useSerializedText:boolean;
+		/** Invokes the given callback synchronously *before* the content of the buffer changes. */
+		onWillChange(callback: (event: IBufferChangeEvent) => void): Disposable;
+		/** Invokes the given callback synchronously *after* the content of the buffer changes. */
+		onDidChange(callback: (event: IBufferChangeEvent) => void): Disposable;
+		/**
+		 * Invokes the given callback asynchronously following one or more changes,
+		 * but only after [[getStoppedChangingDelay]] milliseconds elapse without any other changes
+		 * occuring.
+		 */
+		onDidStopChanging(callback: Function): Disposable;
+		/**
+		 * Invokes the given callback when the in-memory contents of the buffer no longer match
+		 * the contents of the file on disk.
+		 */
+		onDidConflict(callback: Function): Disposable;
+		/** Invoke the given callback when the value of [[isModified]] changes. */
+		onDidChangeModified(callback: (modified: boolean) => void): Disposable;
+		/**
+		 * Invokes the given callback when all [[Marker.onDidChange]] observers have been notified
+		 * of a change to the buffer.
+		 */
+		onDidUpdateMarkers(callback: Function): Disposable;
+		/** Invokes the given callback when a marker is created. */
+		onDidCreateMarker(callback: (marker: Marker) => void): Disposable;
+		/** Invokes the given callback when the value of [[getPath]] changes. */
+		onDidChangePath(callback: (path: string) => void): Disposable;
+		/** Invokes the given callback when the value of [[getEncoding]] changes. */
+		onDidChangeEncoding(callback: (encoding: string) => void): Disposable;
+		/** Invokes the given callback before the buffer is saved to disk. */
+		onWillSave(callback: Function): Disposable;
+		/** Invokes the given callback after the buffer is saved to disk. */
+		onDidSave(callback: (event: IBufferSaveEvent) => void): Disposable;
+		/** Invokes the given callback after the file backing the buffer is deleted. */
+		onDidDelete(callback: Function): Disposable;
+		/** Invokes the given callback *before* the buffer is reloaded from file. */
+		onWillReload(callback: Function): Disposable;
+		/** Invokes the given callback *after* the buffer is reloaded from file. */
+		onDidReload(callback: Function): Disposable;
+		/** Invokes the given callback when the buffer is destroyed. */
+		onDidDestroy(callback: Function): Disposable;
+		/** Invokes the given callback when an error occurs while watching the file. */
+		onWillThrowWatchError(callback: (errorObject: IThrowErrorEvent) => void): Disposable;
 
-		deserializeParams(params:any):any;
-		serializeParams():any;
+		/**
+		 * @return Number of milliseconds that should elapse without a change before
+		 * [[onDidStopChanging]] observers are invoked.
+		 */
+		getStoppedChangingDelay(): number;
 
-		getText():string;
-		getLines():string;
-		isEmpty():boolean;
+		// File Details
+
+		isModified(): boolean;
+		isInConflict(): boolean;
+		/** @return The path of the associated file. */
+		getPath(): string;
+		/** Sets the path of the file associated with the buffer. */
+		setPath(filePath: string): void;
+		/**
+		 * Sets the character encoding for this buffer.
+		 *
+		 * @param encoding Defaults to `'utf8'`.
+		 */
+		setEncoding(encoding: string): void;
+		/** @return The character encoding of this buffer. */
+		getEncoding(): string;
+		/** @return The path of the associated file. */
+		getUri(): string;
+		/** @return The name of the associated file without path information. */
+		getBaseName(): string;
+
+		// Reading Text
+
+		isEmpty(): boolean;
+		getText(): string;
+		getTextInRange(range: IRangeOrArray): string;
+		getLines(): string[];
+		getLastLine(): string;
+		lineForRow(row: number): string;
+		lineEndingForRow(row: number): string;
+		lineLengthForRow(row: number): number;
 		getLineCount():number;
 		getLastRow():number;
-		lineForRow(row:number):string;
-		getLastLine():string;
-		lineEndingForRow(row:number):string;
-		lineLengthForRow(row:number):number;
-		setText(text:string):IRange;
-		setTextViaDiff(text:any):any[];
-		setTextInRange(range:IRange, text:string, normalizeLineEndings?:boolean):IRange;
-		setTextInRange(range:[[number,number],[number,number]], text:string, config?:{normalizeLineEndings?:boolean}):IRange;
-		insert(position:IPoint, text:string, normalizeLineEndings?:boolean):IRange;
-		append(text:string, normalizeLineEndings?:boolean):IRange;
-		delete(range:IRange):IRange;
-		deleteRow(row:number):IRange;
-		deleteRows(startRow:number, endRow:number):IRange;
-		buildPatch(oldRange:IRange, newText:string, normalizeLineEndings?:boolean):IBufferPatch;
-		applyPatch(patch:IBufferPatch):any;
-		getTextInRange(range:IRange):string;
-		clipRange(range:IRange):IRange;
-		clipPosition(position:IPoint):IPoint;
-		getFirstPosition():IPoint;
-		getEndPosition():IPoint;
-		getRange():IRange;
-		rangeForRow(row:number, includeNewline?:boolean):IRange;
-		characterIndexForPosition(position:IPoint):number;
-		characterIndexForPosition(position:[number,number]):number;
-		positionForCharacterIndex(offset:number):IPoint;
-		getMaxCharacterIndex():number;
-		loadSync():TextBuffer;
-		load():Q.IPromise<TextBuffer>;
-		finishLoading():TextBuffer;
-		handleTextChange(event:any):any;
-		destroy():any;
-		isAlive():boolean;
-		isDestroyed():boolean;
-		isRetained():boolean;
-		retain():TextBuffer;
-		release():TextBuffer;
-		subscribeToFile():any;
-		hasMultipleEditors():boolean;
-		reload():any;
-		updateCachedDiskContentsSync():string;
-		updateCachedDiskContents():Q.IPromise<string>;
-		getBaseName():string;
-		getPath():string;
-		getUri():string;
-		setPath(filePath:string):any;
-		save():void;
-		saveAs(filePath:string):any;
-		isModified():boolean;
-		isInConflict():boolean;
-		destroyMarker(id:any):any;
-		matchesInCharacterRange(regex:any, startIndex:any, endIndex:any):any[];
-		scan(regex:any, iterator:any):any;
-		backwardsScan(regex:any, iterator:any):any;
-		replace(regex:any, replacementText:any):any;
-		scanInRange(regex:any, range:any, iterator:any, reverse:any):any;
-		backwardsScanInRange(regex:any, range:any, iterator:any):any;
-		isRowBlank(row:number):boolean;
-		previousNonBlankRow(startRow:number):number;
-		nextNonBlankRow(startRow:number):number;
-		usesSoftTabs():boolean;
-		cancelStoppedChangingTimeout():any;
-		scheduleModifiedEvents():any;
-		emitModifiedStatusChanged(modifiedStatus:any):any;
-		logLines(start:number, end:number):void;
+		isRowBlank(row: number): boolean;
+		/** Finds the first preceding row that's not blank. */
+		previousNonBlankRow(startRow: number): number;
+		/** Finds the next row that's not blank. */
+		nextNonBlankRow(startRow: number): number;
 
-		// delegate to history property
-		undo():any;
-		redo():any;
-		transact(fn:Function):any;
-		beginTransaction():any;
-		commitTransaction():any;
-		abortTransaction():any;
-		clearUndoStack():any;
+		// Mutating Text
 
-		// delegate to markers property
-		markRange(range:any, properties:any):any;
-		markPosition(range:any, properties:any):any;
-		getMarker(id:number):IMarker;
-		getMarkers():IMarker[];
-		getMarkerCount():number;
+		/**
+		 * Replaces the entire contents of the buffer with the given text.
+		 *
+		 * @return A range spanning the new buffer contents.
+		 */
+		setText(text: string): IRange;
+		setTextViaDiff(text: string, skipUndo?: boolean): void;
+		/**
+		 * Sets the text in the given range.
+		 *
+		 * @param options.undo Set to 'skip' to bypass the undo/redo system.
+		 * @return The range of the inserted text.
+		 */
+		setTextInRange(range: IRangeOrArray, newText: string, options?: ITextMutationOptions): IRange;
+		/**
+		 * Inserts text at the given position.
+		 *
+		 * @param options.undo Set to 'skip' to bypass the undo/redo system.
+		 * @return The range of the inserted text.
+		 */
+		insert(position: IPoint, text: string, options?: ITextMutationOptions): IRange;
+		append(text: string, options?: ITextMutationOptions): IRange;
+		/**
+		 * Deletes the text in the given range.
+		 *
+		 * @return An empty range that starts at the beginning of the deleted text.
+		 */
+		delete(range: IRange): IRange;
+		/**
+		 * Deletes the text line at the row.
+		 *
+		 * @return An empty range that starts at the beginning of the deleted text.
+		 */
+		deleteRow(row: number): IRange;
+		/**
+		 * Deletes the text lines within the given range.
+		 *
+		 * @param startRow The first row of text to delete.
+		 * @param endRow The last row (inclusive) of text to delete.
+		 * @return An empty range that starts at the beginning of the deleted text.
+		 */
+		deleteRows(startRow: number, endRow: number): IRange;
+
+		// Markers
+
+		markRange(range: IRangeOrArray, properties: IMarkerProperties): Marker;
+		markPosition(position: IPointOrArray, properties: IMarkerProperties): Marker;
+		getMarkers(): Marker[];
+		getMarker(id: number): Marker;
+		findMarkers(params: IMarkerSearchOptions): Marker[];
+		getMarkerCount(): number;
+		destroyMarker(id: number): void;
+
+		// History
+
+		/** Undoes the last operation, aborting the current transaction (if one is in progress). */
+		undo(): void;
+		/** Redoes the last operation. */
+		redo(): void;
+		transact<T>(groupingInterval: number, fn: () => T): T;
+		transact<T>(fn: Function): any;
+		clearUndoStack(): void;
+		/**
+		 * Creates a snapshot of the current state of the buffer, and a checkpoint that can be used
+		 * to restore the state from the snapshot.
+		 */
+		createCheckpoint(): number;
+		/** Reverts the buffer to the state it was in when the given checkpoint was created. */
+		revertToCheckpoint(checkpoint: number): boolean;
+		/** Groups all changes since the given checkpoint into a single transaction. */
+		groupChangesSinceCheckpoint(checkpoint: number): boolean;
+
+		// Search and Replace
+
+		/**
+		 * Scans the regular expression matches in the entire buffer, and calls the given iterator
+		 * function on each match.
+		 */
+		scan(regex: RegExp, iterator: IScanIteratorFunc): void;
+		/**
+		 * Scans the regular expression matches in the entire buffer in reverse order, and calls the
+		 * given iterator function on each match.
+		 */
+		backwardsScan(regex: RegExp, iterator: IScanIteratorFunc): void;
+		/**
+		 * Scans the regular expression matches in the given range, and calls the given iterator
+		 * function on each match.
+		 *
+		 * @param reverse Defaults to `false`.
+		 */
+		scanInRange(regex: RegExp, range: IRangeOrArray, iterator: IScanIteratorFunc, reverse?: boolean): void;
+		/**
+		 * Scans the regular expression matches in the given range in reverse order, and calls the
+		 * given iterator function on each match.
+		 */
+		backwardsScanInRange(regex: RegExp, range: IRangeOrArray, iterator: IScanIteratorFunc): void;
+		/**
+		 * Replaces all regular expression matches in this buffer with the given text.
+		 *
+		 * @return The number of replacements made.
+		 */
+		replace(regex: RegExp, replacementText: string): number;
+
+		// Buffer Range Details
+
+		/** @return A range spanning the entire buffer. */
+		getRange(): IRange;
+		getLineCount(): number;
+		getLastRow(): number;
+		getFirstPosition(): IPoint;
+		getEndPosition(): IPoint;
+		/** @return The length of the buffer in characters. */
+		getMaxCharacterIndex(): number;
+		/**
+		 * Obtains the range for the given row.
+		 *
+		 * @param includeNewline If `true` and `row` ends with a newline then the returned range will
+		 *                       extend to the start of the next line.
+		 */
+		rangeForRow(row: number, includeNewline?: boolean): IRange;
+		/** Converts a buffer position to an absolute character offset, including newline characters. */
+		characterIndexForPosition(position: IPointOrArray): number;
+		/** Convert an absolute character offset (including newlines) to a buffer position. */
+		positionForCharacterIndex(offset: number): IPoint;
+		/**
+		 * Clips the given range so that it starts and ends at valid buffer positions.
+		 *
+		 * @return The clipped range. Note that the clipped range may be identical to `range`
+		 *         if `range` is a [[Range]] object and is already in-bounds.
+		 */
+		clipRange(range: IRangeOrArray): IRange;
+		/**
+		 * Clips the given point so it is at a valid buffer position.
+		 *
+		 * @return The clipped position. Note that the clipped position may be identical to `position`
+		 *         if `position` is a [[Point]] object and is already in-bounds.
+		 */
+		clipPosition(position: IPointOrArray): IPoint;
+
+		// Buffer Operations
+
+		save(): void;
+		saveAs(filePath: string): void;
+		/**
+		 * Reloads the buffer from file.
+		 *
+		 * @param skipUndo Defaults to `false`.
+		 */
+		reload(skipUndo?: boolean): void;
 	}
+
+	/**
+	 * A mutable text container with undo/redo support and the ability to
+	 * annotate logical regions in the text.
+	 */
+	var TextBuffer: ITextBufferStatic;
 }
 
 declare module "text-buffer" {
-	var TextBuffer: AtomTextBuffer.ITextBufferStatic;
-	export = TextBuffer;
+	export = AtomTextBuffer;
 }
