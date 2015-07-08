@@ -1,4 +1,4 @@
-// Type definitions for Atom 1.0 (based on typings from atom-typescript)
+// Type definitions for Atom 1.0.1
 // Project: https://atom.io/
 // Definitions by: vvakame <https://github.com/vvakame/>, Vadim Macagon <https://github.com/enlight/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -13,8 +13,13 @@
 /// <reference path="../serializable/serializable.d.ts" />
 /// <reference path="../github-electron/github-electron.d.ts" />
 
-// Policy: this file should only declare types from Atom core,
-// any types from non-core Atom modules should be declared in separate files.
+// POLICY
+// 1. This file should only declare types from Atom core,
+//    any types from non-core Atom modules should be declared in separate files.
+// 2. Decompose classes into instance and static interfaces as this allows users
+//    to add extra static and instance members using declaration merging.
+// 3. Do not prefix an `I` to the name of instance/static interfaces for decomposed classes.
+// 4. Do prefix an `I` to all other interfaces declared in this file.
 
 // The Window interface is already defined in TypeScript's lib.d.ts, so the interface below will
 // be merged into the standard one. In Atom this stuff is implemented in window-bootstrap.coffee
