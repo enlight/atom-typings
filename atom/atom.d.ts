@@ -1529,6 +1529,75 @@ declare module AtomCore {
 		isContainedByFold(fold: Fold): boolean;
 	}
 
+	interface IGitStatusChangeEvent {
+		path: string;
+		pathStatus: number;
+	}
+
+	interface GitRepositoryStatic {
+		prototype: GitRepository;
+		new (path: string, options?: any): GitRepository;
+
+		exists(path: string): boolean;
+		open(path: string, options?: { refreshOnWindowFocus?: boolean }): GitRepository;
+	}
+
+	interface GitRepository {
+		constructor: GitRepositoryStatic;
+
+		destroy(): void;
+
+		// Event Subscription
+
+		onDidDestroy(callback: Function): Disposable;
+		onDidChangeStatus(callback: (event: IGitStatusChangeEvent) => void): Disposable;
+		onDidChangeStatuses(callback: Function): Disposable;
+
+		// Repository Details
+
+		getType(): string;
+		getPath(): string;
+		getWorkingDirectory(): string;
+		isProjectAtRoot(): boolean;
+		relativize(path: string): string;
+		hasBranch(branch: string): boolean;
+		getShortHead(path?: string): string;
+		isSubmodule(path: string): boolean;
+		getAheadBehindCount(branch: string, path?: string): { ahead: number; behind: number };
+		getCachedUpstreamAheadBehindCount(path?: string): { ahead: number; behind: number };
+		getConfigValue(key: string, path?: string): string;
+		getOriginURL(path?: string): string;
+		getUpstreamBranch(path?: string): string;
+		getReferences(path?: string): { heads: string[]; remotes: string[]; tags: string[] };
+		getReferenceTarget(reference: string, path?: string): string;
+
+		// Reading Status
+
+		isPathModified(path: string): boolean;
+		isPathNew(path: string): boolean;
+		isPathIgnored(path: string): boolean;
+		getDirectoryStatus(directoryPath: string): number;
+		getPathStatus(path: string): number;
+		getCachedPathStatus(path: string): number;
+		isStatusModified(status: number): boolean;
+		isStatusNew(status: number): boolean;
+
+		// Retrieving Diffs
+
+		getDiffStats(path: string): { added: number; deleted: number };
+		getLineDiffs(path: string, text: string): Array<{
+			oldStart: number;
+			newStart: number;
+			oldLines: number;
+			newLines: number;
+		}>;
+
+		// Checking Out
+
+		checkoutHead(path: string): boolean;
+		checkoutReference(reference: string, create: boolean): boolean;
+	}
+
 	// DONE
 	interface IMarkerChangeEvent {
 		oldHeadScreenPosition: Point;
@@ -1757,7 +1826,8 @@ declare var atom: AtomCore.Atom;
 declare module "atom" {
 	var BufferedNodeProcess: AtomCore.BufferedNodeProcessStatic;
 	var BufferedProcess: AtomCore.BufferedProcessStatic;
-	// TODO: var GitRepository
+	type GitRepository = AtomCore.GitRepository;
+	var GitRepository: AtomCore.GitRepositoryStatic;
 	var Notification: AtomCore.NotificationStatic;
 	var TextBuffer: AtomTextBuffer.TextBufferStatic;
 	var Point: AtomTextBuffer.PointStatic;
