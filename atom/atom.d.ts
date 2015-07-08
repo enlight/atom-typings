@@ -1136,26 +1136,27 @@ declare module AtomCore {
 		appVersion: string;
 		bootstrapScript: string;
 		devMode: boolean;
+		safeMode: boolean;
 		initialPath: string;
 		pathToOpen: string;
 		resourcePath: string;
 		shellLoadTime: number;
-		windowState:string;
+		windowState: string;
 	}
 
 	interface IAtomState {
-		mode:string;
-		packageStates:any;
-		project:any;
-		syntax:any;
-		version:number;
-		windowDimensions:any;
-		workspace:any;
+		version: number;
+		// add more as needed...
 	}
 
 	interface ISerializedState {
 		version?: number;
 		deserializer: string;
+	}
+
+	// DONE
+	interface IAtomSerializable {
+		serialize(): ISerializedState;
 	}
 
 	interface IDeserializer {
@@ -1419,7 +1420,7 @@ declare module AtomCore {
 
 	// DONE
 	/** A registry of grammars used for tokenizing. */
-	interface GrammarRegistry extends IAtomSerializable /*, FirstMate.GrammarRegistry*/ {
+	interface GrammarRegistry extends IAtomSerializable, AtomFirstMate.GrammarRegistry {
 		selectGrammar(filePath: string, fileContents: string): Grammar;
 	}
 
@@ -1489,11 +1490,24 @@ declare module AtomCore {
 	}
 
 	interface TokenizedLine {
-		// TBD
+		tokens: Token[];
+
+		getMaxScreenColumn(): number;
+		getMaxBufferColumn(): number;
+		isSoftWrapped(): boolean;
+		isComment(): boolean;
+		isOnlyWhitespace(): boolean;
+		getTokenCount(): number;
 	}
 
 	interface Token {
-		// TBD
+		value: string;
+
+		isEqual(other: Token): boolean;
+		isBracket(): boolean;
+		isOnlyWhitespace(): boolean;
+		hasLeadingWhitespace(): boolean;
+		hasTrailingWhitespace(): boolean;
 	}
 
 	// DONE
@@ -1540,8 +1554,6 @@ declare module AtomCore {
 		bufferMarker: AtomTextBuffer.Marker;
 		displayBuffer: DisplayBuffer;
 
-		/** New instances should be constructed indirectly via the TextEditor class. */
-		constructor(args: { bufferMarker: AtomTextBuffer.Marker; displayBuffer: DisplayBuffer });
 		/** Destroys the marker after which the marker cannot be restored by undo/redo operations. */
 		destroy(): void;
 		/** Creates and returns a new marker with the same properties as this one. */
@@ -1614,22 +1626,14 @@ declare module AtomCore {
 	}
 
 	// DONE
-	// see <https://atom.io/docs/v0.186.0/advanced/serialization>
-	interface IAtomSerializableStatic<T> {
-		deserialize(state: ISerializedState): T;
-		new (data: T): IAtomSerializable;
-	}
+	interface AtomStatic {
+		prototype: Atom;
+		new (state: IAtomState): Atom;
 
-	// DONE
-	interface IAtomSerializable {
-		serialize(): ISerializedState;
-	}
-
-	// DONE
-	interface AtomStatic extends IAtomSerializableStatic<Atom> {
 		version: number;
 
 		loadOrCreate(mode: string): Atom;
+		deserialize(state: ISerializedState): Atom;
 		loadState(mode: any): void;
 		getStateKey(paths: string[], mode: string): string;
 		getConfigDirPath(): string;
@@ -1637,13 +1641,12 @@ declare module AtomCore {
 		getLoadSettings(): IAtomSettings;
 		updateLoadSettings(key: string, value: any): void;
 		getCurrentWindow(): BrowserWindow;
-
-		prototype: Atom;
-		new (state: IAtomState): Atom;
 	}
 
 	// DONE
 	interface Atom extends Model {
+		constructor: AtomStatic;
+
 		commands: CommandRegistry;
 		config: Config;
 		clipboard: Clipboard;
@@ -1661,7 +1664,6 @@ declare module AtomCore {
 		views: ViewRegistry;
 		workspace: Workspace;
 
-		constructor: AtomStatic;
 		initialize(): void;
 
 		// Event Subscription
@@ -1762,13 +1764,17 @@ declare module "atom" {
 	var Range: AtomTextBuffer.RangeStatic;
 	var File: PathWatcher.IFileStatic;
 	var Directory: PathWatcher.IDirectoryStatic;
+	type Emitter = AtomEventKit.Emitter;
 	var Emitter: AtomEventKit.EmitterStatic;
+	type Disposable = AtomEventKit.Disposable;
 	var Disposable: AtomEventKit.DisposableStatic;
 	type CompositeDisposable = AtomEventKit.CompositeDisposable;
 	var CompositeDisposable: AtomEventKit.CompositeDisposableStatic;
 	// More concise than the 6 lines above but requires TypeScript 1.5:
 	//export { Emitter, Disposable, CompositeDisposable } from 'event-kit';
 	// NOTE: The following are only available when NOT running as a child Node process.
+	type Task = AtomCore.Task;
 	var Task: AtomCore.TaskStatic;
+	type TextEditor = AtomCore.TextEditor;
 	var TextEditor: AtomCore.TextEditorStatic;
 }
