@@ -12,14 +12,18 @@ declare module AtomSerializable {
 		deserializer: string;
 	}
 
-  /** A mixin to streamline the process of writing serializable classes. */
-  class Serializable extends Mixto.Mixin {
+  /** Static side of the Serializable class. */
+  interface SerializableStatic extends Mixto.IMixinStatic {
+    prototype: Serializable;
+
+    new (): Serializable;
     /**
      * Register serializable classes.
+     *
      * @param deserializers Classes (constructor functions) that either include or extend the
-     *                     Serializable mixin.
+     *                      Serializable mixin.
      */
-    static registerDeserializers(...deserializers: Function[]): void;
+    registerDeserializers(...deserializers: Function[]): void;
     /**
      * Register a serializable class.
      *
@@ -33,28 +37,40 @@ declare module AtomSerializable {
      * Serializable.includeInto(Vehicle);
      * Serializable.registerDeserializer(Vehicle);
      *```
+     *
      * @param deserializer A class (constructor function) that either includes or extends the
      *                     Serializable mixin.
      */
-    static registerDeserializer(deserializer: Function): void;
+    registerDeserializer(deserializer: Function): void;
     /**
      * Deserializes an object from a serialized state.
+     *
+     * @param <T> Type of object to deserialize.
      * @param state Serialized state of the object to deserialize, in most cases this state will be
      *              created by the [[serialize]] instance method.
      * @param params Additional non-serializable parameters which will be merged with the
      *               deserialized parameters when constructing the object.
      * @return The deserialized object, or 'undefined' if deserialization failed.
      */
-    static deserialize(state: ISerializedState, params?: any): any;
+    deserialize<T>(state: ISerializedState, params?: any): T;
+  }
+
+  /** Instance side of Serializable class. */
+  interface Serializable {
+    constructor: SerializableStatic;
     /**
      * Serializes this object.
+     *
      * @return The serialized state of this object.
      */
     serialize(): ISerializedState;
   }
 
+  /** A mixin to streamline the process of writing serializable classes. */
+  var Serializable: SerializableStatic;
+
   /**
-   * Classes that extend or include the Serializable class should implement this interface.
+   * Classes that extend or include the `Serializable` class should implement this interface.
    * Note that the constructor parameters should match the parameters that are
    * serialized/deserialized.
    */
@@ -81,12 +97,13 @@ declare module AtomSerializable {
 
   /**
    * A combination of the *instance side* of the `Serializable` class and the `IParamsSerializer`
-   * interface. This is the actual instance side interface of any serializable class built with the
-   * `Serializable` mixin.
+   * interface.
    */
-  interface ISerializable extends Serializable, IParamsSerializer {
+  interface ISerializable extends IParamsSerializer {
+    serialize(): ISerializedState;
   }
 
+  // DITCH this
   // This interface is just for reference and corresponds to a subset of the static side of a class
   // that includes or extends the Serializable mixin class.
   interface ISerializableStatic {
