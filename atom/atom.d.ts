@@ -1219,6 +1219,9 @@ declare module AtomCore {
 	 * stylesheets, keymaps, grammar, editor properties, and menus.
 	 */
 	interface Package {
+		/** Path to root directory of the package. */
+		path: string;
+
 		/** Is this package compatible with this version of Atom? */
 		isCompatible(): boolean;
 	}
