@@ -55,7 +55,6 @@ declare module AtomCore {
 		isDestroyed(): boolean;
 	}
 
-	// DONE
 	interface CommandRegistry {
 		add(target: string, commands: Object): Disposable;
 		add(target: string, commandName: string, callback: (e: Event) => void): Disposable;
@@ -197,20 +196,17 @@ declare module AtomCore {
 		refreshMarkerScreenPositions(): void;
 	}
 
-	// DONE
 	/** Interface for ViewRegistry class in Atom. */
 	interface ViewRegistry {
 		addViewProvider(modelConstructor: Function, createView: (model: any) => HTMLElement): Disposable;
 		getView(model: any): HTMLElement;
 	}
 
-	// DONE
 	/** Interface for ScopeDescriptor class in Atom. */
 	interface ScopeDescriptor {
 		getScopesArray(): string[];
   }
 
-	// DONE
 	interface ICursorChangeEvent {
 		oldBufferPosition: PointOrArray;
 		oldScreenPosition: PointOrArray;
@@ -221,7 +217,6 @@ declare module AtomCore {
 		cursor: Cursor;
 	}
 
-	// DONE
 	/** Interface for Cursor class in Atom. */
 	interface Cursor extends Model {
 		editor: TextEditor;
@@ -304,7 +299,6 @@ declare module AtomCore {
 		wordRegExp(options?: { includeNonWordCharacters: boolean }): RegExp;
 	}
 
-	// DONE
 	interface ISelectionInsertTextOptions {
 		select?: boolean;
 		autoIndent?: boolean;
@@ -314,7 +308,6 @@ declare module AtomCore {
 		undo?: string;
 	}
 
-	// DONE
 	/** Represents a selection in the text editor. */
 	interface Selection extends Model {
 		cursor: Cursor;
@@ -409,7 +402,6 @@ declare module AtomCore {
 		compare(otherSelection: Selection): number;
 	}
 
-	// DONE
 	interface ISelectionChangeEvent {
 		oldBufferRange: Range;
 		oldScreenRange: Range;
@@ -419,7 +411,6 @@ declare module AtomCore {
 		selection: Selection;
 	}
 
-	// DONE
 	interface IDecorationParams {
 		type: string;
 		class: string;
@@ -430,7 +421,6 @@ declare module AtomCore {
 		gutterName?: string;
 	}
 
-	// DONE
 	/** A visual representation of a marker in the text editor. */
 	interface Decoration {
 		/** Best practice is to destroy the decoration indirectly by destroying the marker. */
@@ -447,7 +437,6 @@ declare module AtomCore {
 		setProperties(newProperties: IDecorationParams);
 	}
 
-	// DONE
 	interface GutterContainer {
 		destroy(): void;
 		// all methods below are also currently available in TextEditor
@@ -463,7 +452,6 @@ declare module AtomCore {
 		onDidRemoveGutter(callback: (name: string) => void): Disposable;
 	}
 
-	// DONE
 	/** A gutter within a text editor. */
 	interface Gutter {
 		name: string;
@@ -478,7 +466,6 @@ declare module AtomCore {
 		onDidDestroy(callback: Function): Disposable;
 	}
 
-	// DONE
 	/** Static side of the TextEditor class. */
 	interface TextEditorStatic {
 		prototype: TextEditor;
@@ -499,7 +486,6 @@ declare module AtomCore {
 		}): TextEditor;
 	}
 
-	// DONE
 	/**
 	 * Represents all essential editing state for a single text buffer, including cursors,
 	 * selections, folds, and soft wraps.
@@ -895,7 +881,6 @@ declare module AtomCore {
 		logScreenLines(start?: number, end?: number): void;
 	}
 
-	// DONE
 	/** A container that displays content at the center of the workspace. */
 	interface Pane extends Model, ISerializable {
 		// Event Subscription
@@ -957,7 +942,6 @@ declare module AtomCore {
 		splitDown(params?: { items?: any[], copyActiveItem?: boolean }): Pane;
 	}
 
-	// DONE
 	/** Interface for Project class in Atom. */
 	interface Project extends Model, ISerializable {
 		onDidChangePaths(callback: (projectPaths: string[]) => void): Disposable;
@@ -971,14 +955,12 @@ declare module AtomCore {
 		contains(pathToCheck: string): boolean;
 	}
 
-	// DONE
 	interface IWorkspacePanelOptions{
 		item: any; // DOM element, JQuery element, or a model with a registered view
 		visible?: boolean;
 		priority?: number;
 	}
 
-	// DONE
 	/** A container on the edge of an editor window. */
 	interface Panel {
 		destroy(): void;
@@ -991,31 +973,26 @@ declare module AtomCore {
 		show(): void;
 	}
 
-	// DONE
 	interface IPaneItemEvent {
 		item: any;
 		pane: Pane;
 		index: number;
 	}
 
-	// DONE
 	interface IPaneItemOpenEvent extends IPaneItemEvent {
 		uri?: string;
 	}
 
-	// DONE
 	/** A promise that provides the ability to cancel the asynchronous operation it represents. */
 	interface ICancellablePromise extends Q.Promise<string> {
 		cancel(): void;
 	}
 
-	// DONE
 	interface IWorkspaceScanIteratorFunc {
 		(filePath: string): void;
 		(arg: { filePath: string; matches: any[] }): void;
 	}
 
-	// DONE
 	interface IWorkspaceScanResult {
 		/** Path to the file within which a match was found. */
 		filePath: string;
@@ -1033,7 +1010,6 @@ declare module AtomCore {
 		}>;
 	}
 
-	// DONE
 	/** Interface for Workspace class in Atom. */
 	interface Workspace extends Model, ISerializable {
 		// Event Subscription
@@ -1154,7 +1130,6 @@ declare module AtomCore {
 		deserializer: string;
 	}
 
-	// DONE
 	interface IAtomSerializable {
 		serialize(): ISerializedState;
 	}
@@ -1165,7 +1140,6 @@ declare module AtomCore {
 		deserialize(state: ISerializedState, params?: any): any;
 	}
 
-	// DONE
 	/** Interface for DeserializerManager class in Atom. */
 	interface DeserializerManager {
 		add(...deserializers: IDeserializer[]): Disposable;
@@ -1179,7 +1153,6 @@ declare module AtomCore {
 		keyPath: string;
 	}
 
-	// DONE
 	/** Provides access to all Atom configuration details. */
 	interface Config {
 		// Event Subscription
@@ -1213,7 +1186,6 @@ declare module AtomCore {
 		transact(callback: Function): void;
 	}
 
-	// DONE
 	/**
 	 * Loads and activates an Atom package's main module and resources such as
 	 * stylesheets, keymaps, grammar, editor properties, and menus.
@@ -1226,12 +1198,10 @@ declare module AtomCore {
 		isCompatible(): boolean;
 	}
 
-	// DONE
 	/** Interface for ThemePackage class in Atom. */
 	interface ThemePackage extends Package {
 	}
 
-	// DONE
 	/** Coordinates the lifecycle of Atom packages. */
 	interface PackageManager {
 		/** Invokes the given callback when all packages have been loaded. */
@@ -1294,7 +1264,6 @@ declare module AtomCore {
 		getAvailablePackageMetadata(): any[];
 	}
 
-	// DONE
 	/** Loads and activates Atom themes. */
 	interface ThemeManager {
 		onDidChangeActiveThemes(callback: Function): Disposable;
@@ -1307,13 +1276,11 @@ declare module AtomCore {
 		getEnabledThemeNames(): string[];
 	}
 
-	// DONE
 	/** A registry of commands that can be accessed via a context menu. */
 	interface ContextMenuManager {
 		add(itemsBySelector: any): Disposable;
 	}
 
-	// DONE
 	/** Interface for items specified within the `itemsBySelector` argument of `ContextMenuManager.add()`. */
 	interface IContextMenuItem {
 		label?: string;
@@ -1324,7 +1291,6 @@ declare module AtomCore {
 		shouldDisplay?: (event: MouseEvent) => void;
 	}
 
-	// DONE
 	/** Interface for items passed to `MenuManager.add()`. */
 	interface IMenuItem {
 		label: string;
@@ -1332,14 +1298,12 @@ declare module AtomCore {
 		command?: string;
 	}
 
-	// DONE
 	/** A registry of commands that can be accessed via the application menu. */
 	interface MenuManager {
 		add(items: IMenuItem[]): Disposable;
 		update(): void;
 	}
 
-	// DONE
 	/** Provides access to the clipboard for copy/pasting. */
 	interface Clipboard {
 		md5(text: string): string;
@@ -1348,7 +1312,6 @@ declare module AtomCore {
 		readWithMetadata(): { text: string; metadata: any };
 	}
 
-	// DONE
 	interface IWindowDimensions {
 		x: number;
 		y: number;
@@ -1356,7 +1319,6 @@ declare module AtomCore {
 		height: number;
 	}
 
-	// DONE
 	/** Interface for StorageFolder class in Atom. */
 	interface StorageFolder {
 		store(name: string, value: any): void;
@@ -1365,13 +1327,11 @@ declare module AtomCore {
 		getPath(): string;
 	}
 
-	// DONE
 	/** Associates tooltips with HTML elements or selectors. */
 	interface TooltipManager {
 		add(target: HTMLElement, options: any): Disposable;
 	}
 
-	// DONE
 	interface INotificationOptions {
 		detail?: string;
 		dismissable?: boolean;
@@ -1383,7 +1343,6 @@ declare module AtomCore {
 		new (type: string, message: string, options?: INotificationOptions): Notification;
 	}
 
-	// DONE
 	/** A notification to the user containing a message and type. */
 	interface Notification {
 		constructor: NotificationStatic;
@@ -1404,7 +1363,6 @@ declare module AtomCore {
 		getIcon(): string;
 	}
 
-	// DONE
 	/** Creates notifications to be shown to the user. */
 	interface NotificationManager {
 		onDidAddNotification(callback: (notification: Notification) => void): Disposable;
@@ -1421,19 +1379,16 @@ declare module AtomCore {
 		clear(): void;
 	}
 
-	// DONE
 	/** A registry of grammars used for tokenizing. */
 	interface GrammarRegistry extends IAtomSerializable, AtomFirstMate.GrammarRegistry {
 		selectGrammar(filePath: string, fileContents: string): Grammar;
 	}
 
-	// DONE
 	interface IAtomHTMLStyleElement extends HTMLStyleElement {
 		sourcePath: string;
 		context: string;
 	}
 
-	// DONE
 	/** Allows to query and observe the set of active style sheets. */
 	interface StyleManager {
 		observeStyleElements(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
@@ -1445,7 +1400,6 @@ declare module AtomCore {
 		getUserStyleSheetPath(): string;
 	}
 
-	// DONE
 	/** Static side of the BufferedProcess class. */
 	interface BufferedProcessStatic {
 		prototype: BufferedProcess;
@@ -1459,7 +1413,6 @@ declare module AtomCore {
 		}): BufferedProcess;
 	}
 
-	// DONE
 	/** Wraps a Node child process in order to provide standard error/output line buffering. */
 	interface BufferedProcess {
 		onWillThrowError(callback: (errorObject: {
@@ -1469,7 +1422,6 @@ declare module AtomCore {
 		kill(): void;
 	}
 
-	// DONE
 	/** Static side of the BufferedNodeProcess class. */
 	interface BufferedNodeProcessStatic {
 		prototype: BufferedNodeProcess;
@@ -1483,7 +1435,6 @@ declare module AtomCore {
 		}): BufferedNodeProcess;
 	}
 
-	// DONE
 	/** Like [[BufferedProcess]] but accepts a Node script as the command to run. */
 	interface BufferedNodeProcess extends BufferedProcess {
 	}
@@ -1513,7 +1464,6 @@ declare module AtomCore {
 		hasTrailingWhitespace(): boolean;
 	}
 
-	// DONE
 	/** Collapses multiple buffer lines into a single line on screen. */
 	interface Fold {
 		id: number;
@@ -1601,7 +1551,6 @@ declare module AtomCore {
 		checkoutReference(reference: string, create: boolean): boolean;
 	}
 
-	// DONE
 	interface IMarkerChangeEvent {
 		oldHeadScreenPosition: Point;
 		newHeadScreenPosition: Point;
@@ -1672,7 +1621,6 @@ declare module AtomCore {
 		clearTail(properties?: any): boolean;
 	}
 
-	// DONE
 	/** Static side of the Task class. */
 	interface TaskStatic {
 		prototype: Task;
@@ -1681,7 +1629,6 @@ declare module AtomCore {
 		once(taskPath: string, ...args: any[]): Task;
 	}
 
-	// DONE
 	/** Runs a Node script in a separate process. */
 	interface Task {
 		constructor: TaskStatic;
@@ -1697,7 +1644,6 @@ declare module AtomCore {
 		terminate(): boolean;
 	}
 
-	// DONE
 	interface AtomStatic {
 		prototype: Atom;
 		new (state: IAtomState): Atom;
@@ -1715,7 +1661,6 @@ declare module AtomCore {
 		getCurrentWindow(): BrowserWindow;
 	}
 
-	// DONE
 	interface Atom extends Model {
 		constructor: AtomStatic;
 
