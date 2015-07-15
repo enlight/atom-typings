@@ -14,9 +14,9 @@ Here's the current status of getting these type definitions into [DefinitelyType
 - [ ] [atom-keymap](https://github.com/enlight/atom-typings/tree/master/atom-keymap)
   - [x] [PR submitted](https://github.com/borisyankov/DefinitelyTyped/pull/4905)
   - [ ] PR merged
-- [ ] [first-mate](https://github.com/enlight/atom-typings/tree/master/first-mate)
+- [x] [first-mate](https://github.com/borisyankov/DefinitelyTyped/tree/master/first-mate)
   - [x] [PR submitted](https://github.com/borisyankov/DefinitelyTyped/pull/4906)
-  - [ ] PR merged
+  - [x] PR merged
 - [ ] [serializable](https://github.com/enlight/atom-typings/tree/master/serializable)
   - [ ] PR submitted
   - [ ] PR merged
