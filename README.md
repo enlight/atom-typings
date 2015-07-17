@@ -11,9 +11,9 @@ but there's a bit of a backlog and a limited number of maintainers, so it'll tak
 Here's the current status of getting these type definitions into [DefinitelyTyped](https://github.com/borisyankov/DefinitelyTyped/):
 - [x] [event-kit](https://github.com/borisyankov/DefinitelyTyped/tree/master/event-kit)
   - [x] PR merged
-- [ ] [atom-keymap](https://github.com/enlight/atom-typings/tree/master/atom-keymap)
+- [x] [atom-keymap](https://github.com/borisyankov/DefinitelyTyped/tree/master/atom-keymap)
   - [x] [PR submitted](https://github.com/borisyankov/DefinitelyTyped/pull/4905)
-  - [ ] PR merged
+  - [x] PR merged
 - [x] [first-mate](https://github.com/borisyankov/DefinitelyTyped/tree/master/first-mate)
   - [x] [PR submitted](https://github.com/borisyankov/DefinitelyTyped/pull/4906)
   - [x] PR merged
