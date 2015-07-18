@@ -52,7 +52,12 @@ class Plane implements ISerializable {
 
 Serializable.includeInto(Plane);
 
-var plane1 = new Plane(4, new Pilot('Surely', 'Captain'));
+var pilot = new Pilot('Surely', 'Captain');
+var plane1 = new Plane(4, pilot);
 var plane2 = Plane.deserialize(plane1.serialize());
 
 // Polymorphic Deserialization
+
+Serializable.registerDeserializers(Pilot, Plane);
+var states = [pilot, plane1].map((obj) => { return obj.serialize(); });
+var objects = states.map((state) => { return Serializable.deserialize(state); });
