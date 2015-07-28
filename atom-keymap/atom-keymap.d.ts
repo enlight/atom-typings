@@ -1,5 +1,5 @@
-// Type definitions for first-mate v5.1.5
-// Project: https://github.com/atom/first-mate/
+// Type definitions for atom-keymap v5.1.5
+// Project: https://github.com/atom/atom-keymap/
 // Definitions by: Vadim Macagon <https://github.com/enlight/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
