@@ -253,7 +253,7 @@ declare module AtomTextBuffer {
 		isEqual(other: Marker): boolean;
 		getInvalidationStrategy(): string;
 		getProperties(): any;
-		setProperties(properties: any);
+		setProperties(properties: any): boolean;
 		copy(options?: any): Marker;
 		destroy(): void;
 		compare(other: Marker): number;

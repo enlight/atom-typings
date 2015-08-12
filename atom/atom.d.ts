@@ -4,7 +4,6 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 /// <reference path="../q/Q.d.ts" />
-/// <reference path="../jquery/jquery.d.ts" />
 /// <reference path="../pathwatcher/pathwatcher.d.ts" />
 /// <reference path="../text-buffer/text-buffer.d.ts" />
 /// <reference path="../event-kit/event-kit.d.ts" />
@@ -434,7 +433,7 @@ declare module AtomCore {
 		getMarker(): Marker;
 		isType(type: string | string[]): boolean;
 		getProperties(): IDecorationParams;
-		setProperties(newProperties: IDecorationParams);
+		setProperties(newProperties: IDecorationParams): void;
 	}
 
 	interface GutterContainer {
@@ -555,7 +554,7 @@ declare module AtomCore {
 		getLongTitle(): string;
 		getPath(): string;
 		getEncoding(): string;
-		setEncoding(encoding: string);
+		setEncoding(encoding: string): void;
 		isModified(): boolean;
 		isEmpty(): boolean;
 		copyPathToClipboard(): void;
@@ -570,7 +569,7 @@ declare module AtomCore {
 		// Reading Text
 
 		getText(): string;
-		getTextInBufferRange(range: RangeOrArray);
+		getTextInBufferRange(range: RangeOrArray): string;
 		getLineCount(): number;
 		getScreenLineCount(): number;
 		getLastBufferRow(): number;
@@ -580,7 +579,7 @@ declare module AtomCore {
 		tokenizedLineForScreenRow(screenRow: number): TokenizedLine;
 		tokenizedLinesForScreenRows(start: number, end: number): TokenizedLine[];
 		bufferRowForScreenRow(screenRow: number): number;
-		bufferRowsForScreenRows(startRow, endRow): number[];
+		bufferRowsForScreenRows(startRow: number, endRow: number): number[];
 		screenRowForBufferRow(bufferRow: number): number;
 		getMaxScreenLineLength(): number;
 		getLongestScreenRow(): number;
@@ -673,7 +672,7 @@ declare module AtomCore {
 		findMarkers(properties: any): Marker[];
 		getMarker(id: number): Marker;
 		getMarkers(): Marker[];
-		getMarkerCount();
+		getMarkerCount(): number;
 		destroyMarker(id: number): void;
 
 		// Cursors
@@ -873,7 +872,7 @@ declare module AtomCore {
 		// Rendering
 
 		getPlaceholderText(): string;
-		setPlaceholderText(placeholderText: string);
+		setPlaceholderText(placeholderText: string): void;
 
 		// Utility
 
@@ -1392,9 +1391,9 @@ declare module AtomCore {
 	/** Allows to query and observe the set of active style sheets. */
 	interface StyleManager {
 		observeStyleElements(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
-		onDidAddStyleElement(callback): Disposable;
-		onDidRemoveStyleElement(callback): Disposable;
-		onDidUpdateStyleElement(callback): Disposable;
+		onDidAddStyleElement(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
+		onDidRemoveStyleElement(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
+		onDidUpdateStyleElement(callback: (styleElement: IAtomHTMLStyleElement) => void): Disposable;
 
 		getStyleElements(): IAtomHTMLStyleElement[];
 		getUserStyleSheetPath(): string;
@@ -1471,7 +1470,7 @@ declare module AtomCore {
 		marker: Marker;
 
 		isInsideLargerFold(): boolean;
-		destroy();
+		destroy(): void;
 		getBufferRange(options?: { includeNewline: boolean }): Range;
 		/** @return Array with two elements: `[startRow, endRow]`. */
 		getBufferRowRange(): Array<number>;
@@ -1724,9 +1723,9 @@ declare module AtomCore {
 		pickFolder(callback: (paths: string[]) => void): void;
 		close(): void;
 		getSize(): { width: number, height: number };
-		setSize(width: number, height: number);
+		setSize(width: number, height: number): void;
 		getPosition(): { x: number, y: number };
-		setPosition(x: number, y: number);
+		setPosition(x: number, y: number): void;
 		getCurrentWindow(): BrowserWindow;
 		center(): void;
 		focus(): void;
@@ -1734,7 +1733,7 @@ declare module AtomCore {
 		hide(): void;
 		reload(): void;
 		isMaximized(): boolean;
-		maximize();
+		maximize(): void;
 		isFullScreen(): boolean;
 		setFullScreen(fullScreen: boolean): void;
 		toggleFullScreen(): void;
