@@ -1332,6 +1332,7 @@ declare module AtomCore {
 	}
 
 	interface INotificationOptions {
+		stack?: string;
 		detail?: string;
 		dismissable?: boolean;
 		icon?: string;
@@ -1342,6 +1343,7 @@ declare module AtomCore {
 		new (type: string, message: string, options?: INotificationOptions): Notification;
 	}
 
+	// v1.0.18
 	/** A notification to the user containing a message and type. */
 	interface Notification {
 		constructor: NotificationStatic;
@@ -1362,16 +1364,17 @@ declare module AtomCore {
 		getIcon(): string;
 	}
 
+	// v1.0.18
 	/** Creates notifications to be shown to the user. */
 	interface NotificationManager {
 		onDidAddNotification(callback: (notification: Notification) => void): Disposable;
-		addSuccess(message: string, options?: INotificationOptions): Disposable;
-		addInfo(message: string, options?: INotificationOptions): Disposable;
-		addWarning(message: string, options?: INotificationOptions): Disposable;
-		addError(message: string, options?: INotificationOptions): Disposable;
-		addFatalError(message: string, options?: INotificationOptions): Disposable;
+		addSuccess(message: string, options?: INotificationOptions): Notification;
+		addInfo(message: string, options?: INotificationOptions): Notification;
+		addWarning(message: string, options?: INotificationOptions): Notification;
+		addError(message: string, options?: INotificationOptions): Notification;
+		addFatalError(message: string, options?: INotificationOptions): Notification;
 
-		add(type: string, message: string, options?: INotificationOptions): Disposable;
+		add(type: string, message: string, options?: INotificationOptions): Notification;
 		addNotification(notification: Notification): Notification;
 
 		getNotifications(): Notification[];
